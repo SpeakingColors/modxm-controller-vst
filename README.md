@@ -6,6 +6,6 @@ Controller plugin for the Yamaha MODX M.
 Early work in progress. Free and open source. Donations welcome (link coming).
 
 ## License
-To be added (AGPL-3.0 for JUCE plugins, MIT for Korg logue units).
+AGPL-3.0-or-later, see [LICENSE](LICENSE).
 
 Not affiliated with or endorsed by any hardware maker named here. All trademarks belong to their owners.

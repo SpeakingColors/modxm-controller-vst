@@ -1,5 +1,7 @@
 # MODX M Controller 🐈
 
+<img src="assets/icon.svg" width="96" align="right" alt="icon">
+
 Controller plugin for the Yamaha MODX M.
 
 ## Status

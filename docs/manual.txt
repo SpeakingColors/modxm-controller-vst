@@ -1,0 +1,19 @@
+# Intro
+MODX M Controller sends and receives the MIDI messages (CC and NRPN) of the Yamaha MODX M, so you can control the synth from your DAW, automate it, and see its settings change in the plugin. It is an early build: the editor is a searchable list of every control.
+
+# Quick start
+- On the Yamaha MODX M, turn on MIDI CC receive and transmit (and NRPN where the device has the option).
+- Insert the plugin on a MIDI track whose output goes to the Yamaha MODX M, and send the track's MIDI to the device. Set the plugin's MIDI channel to the one the device listens on.
+- Move a value in the list: the matching message is sent to the device. Turn a knob on the device: the value moves in the plugin.
+- Use the group menu and the search box to find a control. Send all sends every value to the device at once.
+- Every control is an automatable parameter in your DAW.
+
+# Honest status
+- The map has 15 entries (Channel messages). It was written from the maker's documentation, nothing was invented.
+- None of the 15 controls has been tested on the real device. Every control is marked "not tested on hardware yet" in the list. A range that the documentation does not print is assumed to be 0 to 127 and is marked that way.
+- No SysEx and no patch librarian yet. Nothing is sent that is not in the map.
+- Incoming messages from the device are consumed by the plugin and never echoed back. At most 16 values are sent per audio block so the device is not flooded.
+
+# Window
+- Resize by dragging any edge or corner; the shape stays the same. Hover a control for its address (CC or NRPN number).
+- Free and open source. The plugin collects no data and never touches the network.

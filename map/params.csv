@@ -1,0 +1,16 @@
+id,group,name,kind,a,b,min,max,def,range_src,hw
+cc_1,Channel messages,Modulation,cc,1,0,0,127,0,assumed,0
+cc_5,Channel messages,Portamento Time,cc,5,0,0,127,0,assumed,0
+cc_7,Channel messages,Channel Volume,cc,7,0,0,127,0,assumed,0
+cc_10,Channel messages,Pan,cc,10,0,0,127,0,assumed,0
+cc_11,Channel messages,Expression,cc,11,0,0,127,0,assumed,0
+cc_64,Channel messages,Sustain,cc,64,0,0,127,0,assumed,0
+cc_65,Channel messages,Portamento Switch,cc,65,0,0,127,0,assumed,0
+cc_66,Channel messages,Sostenuto,cc,66,0,0,127,0,assumed,0
+cc_71,Channel messages,Harmonic Content (received) / Filter Resonance (transmitted),cc,71,0,0,127,0,assumed,0
+cc_72,Channel messages,EG Release Time,cc,72,0,0,127,0,assumed,0
+cc_73,Channel messages,EG Attack Time,cc,73,0,0,127,0,assumed,0
+cc_74,Channel messages,Brightness (received) / Filter Cutoff (transmitted),cc,74,0,0,127,0,assumed,0
+cc_75,Channel messages,EG Decay Time,cc,75,0,0,127,0,assumed,0
+cc_91,Channel messages,Effects 1 Depth (reverb send),cc,91,0,0,127,0,assumed,0
+cc_94,Channel messages,Effects 4 Depth (variation send),cc,94,0,0,127,0,assumed,0

@@ -1,0 +1,40 @@
+name: build
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  core-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh tests/run.sh
+  plugin:
+    needs: core-tests
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ pkg-config libasound2-dev libx11-dev libxinerama-dev libxext-dev \
+            libxrandr-dev libxcursor-dev libfreetype-dev libfontconfig1-dev libgl-dev
+      - run: git clone --depth 1 --branch 8.0.16-security https://github.com/juce-framework/JUCE.git third_party/JUCE
+      - shell: bash
+        run: |
+          set -o pipefail
+          (cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --parallel 4) 2>&1 | tee build.log
+      - if: failure()
+        shell: bash
+        run: grep -E "error|Error" build.log | head -15 | while IFS= read -r l; do echo "::error::${l:0:400}"; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin-${{ runner.os }}
+          path: |
+            build/*_artefacts/**/VST3/**
+            build/*_artefacts/**/Standalone/**

@@ -4,6 +4,7 @@ Controller for the Yamaha MODX M6, close to Yamaha ESP. MODX2_* is the current d
 
 ## Done
 - [x] Plugin skeleton: parameter map from the manual, CC and NRPN send/receive, host automation, cat-ui look, CI on three systems
+- [x] Release packaging: installers (Windows, macOS, Linux Flatpak extension), uninstallers and PDF manual built by the release workflow (test builds, not tested on real machines)
 
 ## Next
 - [ ] Test every map entry on the real device and flip it to verified (`hw` column in map/params.csv)

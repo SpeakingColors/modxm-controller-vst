@@ -1,0 +1,58 @@
+[
+ {
+  "title": "MODX M6 controller · Home",
+  "img": "gallery_1.png",
+  "file": "MODX.dc.html",
+  "w": 1588,
+  "h": 1266
+ },
+ {
+  "title": "MODX M6 controller · AWM2",
+  "img": "gallery_2.png",
+  "file": "MODX_AWM2.dc.html",
+  "w": 1588,
+  "h": 762
+ },
+ {
+  "title": "MODX M6 controller · FM-X",
+  "img": "gallery_3.png",
+  "file": "MODX_FMX.dc.html",
+  "w": 1588,
+  "h": 911
+ },
+ {
+  "title": "MODX M6 controller · AN-X",
+  "img": "gallery_4.png",
+  "file": "MODX_ANX.dc.html",
+  "w": 1588,
+  "h": 707
+ },
+ {
+  "title": "MODX M6 controller · Effects",
+  "img": "gallery_5.png",
+  "file": "MODX_FX.dc.html",
+  "w": 1588,
+  "h": 978
+ },
+ {
+  "title": "MODX M6 controller · Motion & Arp",
+  "img": "gallery_6.png",
+  "file": "MODX_Motion.dc.html",
+  "w": 1588,
+  "h": 717
+ },
+ {
+  "title": "MODX M6 controller · Smart Morph",
+  "img": "gallery_7.png",
+  "file": "MODX_Morph.dc.html",
+  "w": 1588,
+  "h": 805
+ },
+ {
+  "title": "MODX M6 controller · Library",
+  "img": "gallery_8.png",
+  "file": "MODX_Library.dc.html",
+  "w": 1588,
+  "h": 686
+ }
+]

@@ -32,19 +32,20 @@ const path = require('path');
           return;
         }
         const clone = e.cloneNode(true); clone.querySelectorAll('text').forEach(t => t.remove());
+        const svgAt = L.ops.length; L.ops.push(null);
         e.querySelectorAll('text').forEach(t => { const r = R(t); L.texts.push({ ...r, s: t.textContent.trim(), fs: parseFloat(t.getAttribute('font-size') || 8), fw: 400, c: t.getAttribute('fill') || '#8E949D', ls: 0, tt: 'none', ff: 'rc' }); op('text', L.texts); });
         const r = R(e); clone.setAttribute('width', r.w); clone.setAttribute('height', r.h);
-        L.svgs.push({ ...r, svg: new XMLSerializer().serializeToString(clone) }); op('svg', L.svgs); return;
+        L.svgs.push({ ...r, svg: new XMLSerializer().serializeToString(clone) }); L.ops[svgAt] = ['svg', L.svgs.length - 1]; return;
       }
       if (e.hasAttribute('data-bar')) { const f = e.firstElementChild; L.bars.push({ ...R(e), frac: f ? parseFloat(f.style.width) / 100 : 0, fill: f ? (getComputedStyle(f).backgroundColor !== 'rgba(0, 0, 0, 0)' ? getComputedStyle(f).backgroundColor : '#DDE1E6') : '#DDE1E6', bg: cs.backgroundColor, rad: parseFloat(cs.borderTopLeftRadius) }); op('bar', L.bars); return; }
       const r = R(e);
       if (e.getAttribute('data-skip')) return;
       const bg = rgba(cs.backgroundColor); let fill = bg;
       if (bg[3] === 0 && cs.backgroundImage.includes('rgb')) fill = rgba(cs.backgroundImage.match(/rgba?\([^)]*\)/)[0]);
-      const bw = ['Top', 'Right', 'Bottom', 'Left'].map(s => parseFloat(cs['border' + s + 'Width'])); const bside = ['Top', 'Right', 'Bottom', 'Left'].find((s, i) => bw[i] > 0) || 'Top'; const bc = rgba(cs['border' + bside + 'Color']);
+      const bw = ['Top', 'Right', 'Bottom', 'Left'].map(s => parseFloat(cs['border' + s + 'Width'])); const bside = ['Top', 'Right', 'Bottom', 'Left'].find((s, i) => bw[i] > 0) || 'Top'; const bc = rgba(cs['border' + bside + 'Color']); const bcs = ['Top', 'Right', 'Bottom', 'Left'].map(s => rgba(cs['border' + s + 'Color']));
       const anyB = bw.some(w => w > 0) && bc[3] > 0;
       if ((fill[3] > 0 || anyB) && r.w > 0 && r.h > 0 && tag !== 'a' || ((fill[3] > 0 || anyB) && tag === 'a')) {
-        L.rects.push({ ...r, bg: fill, bw, bc, rad: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map(parseFloat), tag }); op('rect', L.rects); }
+        L.rects.push({ ...r, bg: fill, bw, bc, bcs, rad: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map(parseFloat), tag }); op('rect', L.rects); }
       if (tag === 'a' && e.getAttribute('href')) L.links.push({ ...r, href: e.getAttribute('href'), txt: e.textContent.trim().slice(0, 30) });
       for (const n of e.childNodes) {
         if (n.nodeType === 3 && n.textContent.trim()) {

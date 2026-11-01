@@ -4,7 +4,7 @@
 
 Controller plugin for the Yamaha MODX M.
 
-<p align="center"><img src="docs/screenshot.png" alt="MODX M Controller editor" width="900"><br><sub>Screenshot of the interactive mockup in docs/mockups.</sub></p>
+<p align="center"><img src="docs/screenshot.png" alt="MODX M Controller editor" width="900"><br><sub>Screenshot of the real plugin window (Home page), rendered from the plugin code.</sub></p>
 
 **Manual:** [PDF, opens in the browser](https://github.com/SpeakingColors/modxm-controller-vst/blob/main/docs/modxm-controller-vst-manual.pdf)
 
@@ -14,7 +14,7 @@ Controller plugin for the Yamaha MODX M.
 - 15 CC parameters plus 308 SysEx parameters (Common, Super Knob, Master EQ, Motion Seq, Part, Part Arpeggio), taken from the Yamaha MODX M Data List (En_B0). Every SysEx block was checked against the sizes Yamaha prints; see [docs/MIDI-DATA-FORMAT.md](docs/MIDI-DATA-FORMAT.md).
 - **None are tested on the real device yet.** The map only holds what the source above lists; ranges the manual does not print are assumed to be 0 to 127 and are marked that way in the plugin.
 - SysEx parameter change is sent when you move a control, and incoming parameter changes from the synth move the controls. No patch librarian or bulk dump yet. Nothing is sent that is not in the map.
-- The editor is still a generic list. The approved mockup has not been ported into the plugin yet.
+- **The Home page of the approved mockup is now the plugin window** (native JUCE, same layout, knobs, wood cheeks and cat logo; resizable, double click the wood or press 100% for the original size; hover bubbles on every control; gear menu for MIDI channel, device number and part). 27 of its 28 knobs, the Volume slider, Porta, Arp Master, MS Master and the Scene buttons are wired to real MODX M parameters. The part table, effect type menus and Master EQ graph are drawn but not wired yet. The other nine pages (Navigation, AWM2, FM-X, AN-X, Effects, Motion, Morph, Library, Output) are not ported yet; the old parameter list is kept as a developer tool in the gear menu.
 - Not tested in a DAW yet. Builds in CI on Linux, Windows and macOS.
 
 How it behaves: every entry is an automatable parameter. Moving it sends MIDI to the device, and incoming CC from the device moves it; incoming CC is consumed, never echoed back. At most 16 parameters are sent per audio block so the device is not flooded. Turn on CC receive and transmit on the device.

@@ -244,15 +244,14 @@ private:
         for (int s = 0; s < 8; ++s) if (home::sceneRect[s] == i) bg = juce::Colour(sceneSel() == s ? home::sceneSelBg : home::sceneOffBg);
         const juce::Rectangle<float> rc(r.x, r.y, r.w, r.h);
         if (bg.getAlpha() > 0) { g.setColour(bg); if (r.rad > 0.0f) g.fillRoundedRectangle(rc, r.rad); else g.fillRect(rc); }
-        const bool uniform = r.bw[0] == r.bw[1] && r.bw[1] == r.bw[2] && r.bw[2] == r.bw[3];
-        g.setColour(juce::Colour(r.bc));
-        if (uniform && r.bw[0] > 0.0f) { if (r.rad > 0.0f) g.drawRoundedRectangle(rc.reduced(r.bw[0] * 0.5f), r.rad, r.bw[0]); else { g.drawRect(rc, r.bw[0]); } }
-        else
+        const auto strip = [&](int side, juce::Rectangle<float> a) { if (r.bw[side] > 0.0f && juce::Colour(r.bc[side]).getAlpha() > 0) { g.setColour(juce::Colour(r.bc[side])); g.fillRect(a); } };
+        const bool uniform = r.bw[0] == r.bw[1] && r.bw[1] == r.bw[2] && r.bw[2] == r.bw[3] && r.bc[0] == r.bc[1] && r.bc[1] == r.bc[2] && r.bc[2] == r.bc[3];
+        if (uniform && r.bw[0] > 0.0f && juce::Colour(r.bc[0]).getAlpha() > 0)
+        { g.setColour(juce::Colour(r.bc[0])); if (r.rad > 0.0f) g.drawRoundedRectangle(rc.reduced(r.bw[0] * 0.5f), r.rad, r.bw[0]); else g.drawRect(rc, r.bw[0]); }
+        else if (!uniform)
         {
-            if (r.bw[0] > 0) g.fillRect(rc.getX(), rc.getY(), rc.getWidth(), r.bw[0]);
-            if (r.bw[1] > 0) g.fillRect(rc.getRight() - r.bw[1], rc.getY(), r.bw[1], rc.getHeight());
-            if (r.bw[2] > 0) g.fillRect(rc.getX(), rc.getBottom() - r.bw[2], rc.getWidth(), r.bw[2]);
-            if (r.bw[3] > 0) g.fillRect(rc.getX(), rc.getY(), r.bw[3], rc.getHeight());
+            strip(0, { rc.getX(), rc.getY(), rc.getWidth(), r.bw[0] }); strip(1, { rc.getRight() - r.bw[1], rc.getY(), r.bw[1], rc.getHeight() });
+            strip(2, { rc.getX(), rc.getBottom() - r.bw[2], rc.getWidth(), r.bw[2] }); strip(3, { rc.getX(), rc.getY(), r.bw[3], rc.getHeight() });
         }
     }
 
@@ -262,7 +261,7 @@ private:
         for (size_t k = 0; k < std::size(home::toggles); ++k) if (home::toggles[k].text == i) c = juce::Colour(toggleOn(k) ? home::toggles[k].onTx : home::toggles[k].offTx);
         for (int s = 0; s < 8; ++s) if (home::sceneText[s] == i) c = juce::Colour(sceneSel() == s ? home::sceneSelTx : home::sceneOffTx);
         g.setColour(c); g.setFont(makeFont(t.fs, t.fw, t.ls));
-        g.drawText(juce::String::fromUTF8(t.s), juce::Rectangle<float>(t.x, t.y, t.w + 6.0f, t.h), juce::Justification::centredLeft, false);
+        g.drawText(juce::String::fromUTF8(t.s), juce::Rectangle<float>(t.x, t.y, t.w + 40.0f, t.h), juce::Justification::centredLeft, false);
     }
 
     void paintSvg(juce::Graphics& g, int i) const

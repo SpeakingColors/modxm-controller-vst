@@ -13,6 +13,9 @@ Controller for the Yamaha MODX M6, close to Yamaha ESP. MODX2_* is the current d
 
 - [x] Parameter map from the MODX M data list: 308 SysEx parameters generated and size-checked (not tested on the device)
 - [ ] Rest of the data list: System, Controller Box, Normal Part Element, FM-X and AN-X parts, effect parameters (need the extractor fixed for those blocks)
+- [x] Home page ported natively from the mockup (generated from MODX2_Home with tools/extract_mockup.js and tools/gen_home_layout.py; render check 98% pixel match)
+- [ ] Home: wire the part table (per part name, pan, volume, mute, solo), effect type menus and the Master EQ graph
+- [ ] Port the other nine pages the same way, one page at a time
 - [ ] Real MIDI I/O behind the Home, Part Edit (AWM2, FM-X, AN-X), Effects, Motion, Morph and Library pages
 - [ ] Output analyzer page
 - [ ] Curved EQ points and remaining icons in the mockup

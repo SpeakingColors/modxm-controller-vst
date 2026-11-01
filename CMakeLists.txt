@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 enable_testing()
 add_executable(core_test tests/test_core.cpp)
 add_test(NAME core COMMAND core_test ${CMAKE_SOURCE_DIR}/map/params.csv)
+add_executable(sysex_test tests/test_sysex.cpp)
+add_test(NAME sysex COMMAND sysex_test)
+add_executable(sysexmap_test tests/test_sysexmap.cpp)
+add_test(NAME sysexmap COMMAND sysexmap_test ${CMAKE_SOURCE_DIR}/map/sysex_params.csv)
 
 # The plugin needs JUCE. CI clones it into third_party/JUCE.
 if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/JUCE/CMakeLists.txt)
@@ -15,7 +19,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/JUCE/CMakeLists.txt)
     FetchContent_Declare(cat_ui GIT_REPOSITORY https://github.com/SpeakingColors/cat-ui GIT_TAG main GIT_SHALLOW TRUE)
     FetchContent_MakeAvailable(cat_ui)
 
-    juce_add_binary_data(ModxMControllerData SOURCES map/params.csv)
+    juce_add_binary_data(ModxMControllerData SOURCES map/params.csv map/sysex_params.csv)
     set_target_properties(ModxMControllerData PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     juce_add_plugin(ModxMController

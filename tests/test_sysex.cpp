@@ -22,7 +22,7 @@ int main()
     p = parse(*bq); CHECK(p.type == SysexType::BulkRequest && p.dev == 15);
     Addr a{ 0x06, 0x00, 0x00, 0x00 }; Bytes d{ 'A', 'B', 'C' };
     unsigned s = kModelModx; for (auto v : a) s += v; for (auto v : d) s += v; s += checksum(a, d); CHECK((s & 127) == 0);
-    Bytes dump{ 0xF0, 0x43, 0x00, 0x7F, 0x1C, 0x0D, 0x00, 0x08, 6, 0, 0, 0, 'A', 'B', 'C', checksum(a, d), 0xF7 };
+    Bytes dump{ 0xF0, 0x43, 0x00, 0x7F, 0x1C, 0x00, 0x08, 0x0D, 6, 0, 0, 0, 'A', 'B', 'C', checksum(a, d), 0xF7 };   // Data List 3-5-4 order
     p = parse(dump); CHECK(p.type == SysexType::BulkDump && p.data == d && p.checksumOk);
     dump[13] ^= 1; p = parse(dump); CHECK(p.type == SysexType::BulkDump && !p.checksumOk);
     Bytes id{ 0xF0, 0x7E, 0x7F, 0x06, 0x02, 0x43, 0x00, 0x41, 0x06, 0x6E, 0x01, 0x00, 0x00, 0x7F, 0xF7 };

@@ -11,9 +11,10 @@ Controller plugin for the Yamaha MODX M.
 ## Status
 **Early build v0.1 (pre-release on the Releases page).** A MIDI controller plugin (VST3 and standalone) that sends and receives the CC messages listed in [map/params.csv](map/params.csv).
 
-- 15 parameters, taken from: Yamaha MODX M (Data List). Only the plain channel CCs are in the map. Parameter changes and SysEx of the MODX M are not implemented.
+- 15 CC parameters plus 308 SysEx parameters (Common, Super Knob, Master EQ, Motion Seq, Part, Part Arpeggio), taken from the Yamaha MODX M Data List (En_B0). Every SysEx block was checked against the sizes Yamaha prints; see [docs/MIDI-DATA-FORMAT.md](docs/MIDI-DATA-FORMAT.md).
 - **None are tested on the real device yet.** The map only holds what the source above lists; ranges the manual does not print are assumed to be 0 to 127 and are marked that way in the plugin.
-- No SysEx and no patch librarian yet. Nothing is sent that is not in the map.
+- SysEx parameter change is sent when you move a control, and incoming parameter changes from the synth move the controls. No patch librarian or bulk dump yet. Nothing is sent that is not in the map.
+- The editor is still a generic list. The approved mockup has not been ported into the plugin yet.
 - Not tested in a DAW yet. Builds in CI on Linux, Windows and macOS.
 
 How it behaves: every entry is an automatable parameter. Moving it sends MIDI to the device, and incoming CC from the device moves it; incoming CC is consumed, never echoed back. At most 16 parameters are sent per audio block so the device is not flooded. Turn on CC receive and transmit on the device.

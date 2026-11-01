@@ -1,6 +1,6 @@
 # Yamaha MODX M (and Montage): MIDI data format
 
-Sources: MODX M Data List (En_B0), "MIDI Data Format" and "MIDI Data Table" sections; Montage Data List (En_D0) for the comparison at the bottom. The PDF layout is two columns, so check any value you plan to hard-code against the real MODX M. Values are copied as printed.
+Sources: MODX M Data List (En_B0, 261 pages), "MIDI Data Format" and "MIDI Data Table" sections (checked again 2026-11-01 against the PDF); Montage Data List (En_D0) for the comparison at the bottom. The PDF layout is two columns, so check any value you plan to hard-code against the real MODX M. Values are copied as printed.
 
 ## Channel messages the MODX M handles
 Receive and transmit unless noted. All control changes are recorded and played back by the sequencer part.
@@ -47,7 +47,7 @@ All Yamaha messages: `F0 43 <type|device> 7F 1C 0D <data> F7`. Group ID `7F 1C`,
 | Message | Format |
 |---|---|
 | Parameter change | `F0 43 1n 7F 1C 0D a1 a2 a3 a4 dd... F7` |
-| Bulk dump | `F0 43 0n 7F 1C 0D bc bc a1 a2 a3 a4 dd... cs F7` |
+| Bulk dump | `F0 43 0n 7F 1C bc bc 0D a1 a2 a3 a4 dd... cs F7` (byte count comes before the model ID; checked against Data List En_B0, section 3-5-4) |
 | Bulk dump request | `F0 43 2n 7F 1C 0D a1 a2 a3 a4 F7` |
 | Parameter request | `F0 43 3n 7F 1C 0D a1 a2 a3 a4 F7` |
 | Master volume | `F0 7F 7F 04 01 ll mm F7` (only mm is used) |
@@ -108,7 +108,11 @@ Where `p` is a part number (0 to 15), `m`, `c`, `k`, `L`, `bb` are indexes as sh
 | AN-X part: common / oscillator o / filter f / wave folder | 4p 00 00 00 / 4p 02 0o 00 / 4p 04 0f 00 / 4p 05 00 00 | |
 | VA part: common / FM operator o | 7p 00 00 00 / 7p 01 0o 00 | |
 
-Byte counts for the per-part blocks and the parameter-by-parameter tables (the pages after the address map) are not copied here: they run for about 4,000 lines in the PDF. Generate them into a data file with a script before using them in code, and keep the generator in the repo.
+## Parameter tables (generated)
+`tools/gen_sysex_map.py` reads the MIDI PARAMETER CHANGE TABLES (PDF pages 225 to 256) and checks every block against the `TOTAL SIZE` Yamaha prints under it. 46 of 56 blocks add up exactly ("certified"); the rest (System, Live Set slot, Controller Box, Normal Part Element, FM-X and AN-X parts, some small blocks) are not used until fixed. `map/sysex_params.csv` holds 308 certified parameters the plugin uses: Performance Common (1 and 2 byte), Super Knob, Master EQ, Motion Seq common, Part (1 and 2 byte) and Part Arpeggio. Reverb, Variation, Rotary and Insertion parameters are left out because their ranges depend on the effect type.
+- 2 byte values are two 7-bit bytes, MSB first: value = MSB x 128 + LSB (the printed Tempo range `00 05` to `02 2C` is 5 to 300, which confirms it).
+- Part addresses start with `1p`: the first byte is `10` plus the part number (0 to 15).
+- Status of every row: official doc only, not verified on the real MODX M.
 
 ## MODX M versus Montage
 Both lists use the same message layout. The differences that matter for a controller:

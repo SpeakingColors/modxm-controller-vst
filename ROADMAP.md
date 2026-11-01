@@ -11,7 +11,8 @@ Controller for the Yamaha MODX M6, close to Yamaha ESP. MODX2_* is the current d
 - [ ] Test the VST3 in Bitwig and Studio One on Linux
 - [ ] Two-CC controls: find out which CC is the coarse one on the device
 
-- [ ] Parameter map from the MODX M data list (SysEx bulk dump and parameter change tables)
+- [x] Parameter map from the MODX M data list: 308 SysEx parameters generated and size-checked (not tested on the device)
+- [ ] Rest of the data list: System, Controller Box, Normal Part Element, FM-X and AN-X parts, effect parameters (need the extractor fixed for those blocks)
 - [ ] Real MIDI I/O behind the Home, Part Edit (AWM2, FM-X, AN-X), Effects, Motion, Morph and Library pages
 - [ ] Output analyzer page
 - [ ] Curved EQ points and remaining icons in the mockup

@@ -11,7 +11,7 @@
 
 namespace ctl
 {
-enum class Kind { CC, NRPN, Pair };   // Pair = two CCs that form one value; the manual does not say how, so it is not sent yet
+enum class Kind { CC, NRPN, Pair, Sysex };   // Pair = two CCs that form one value; the manual does not say how, so it is not sent yet
 
 struct Param
 {
@@ -20,6 +20,9 @@ struct Param
     int a = 0;        // CC number, or NRPN MSB, or first CC of a pair
     int b = 0;        // NRPN LSB, or second CC of a pair
     int minV = 0, maxV = 127, defV = 0;
+    int sysAddr[4] = { 0, 0, 0, 0 };   // Kind::Sysex only: four address bytes; first byte 1p means 0x10 + part (0 to 15)
+    int sysSize = 1;                    // Kind::Sysex only: 1 or 2 data bytes
+    bool perPart = false;               // Kind::Sysex only: address byte 1 is 1p, the part is filled in when sending
     bool rangeFromManual = false;   // false: 0 to 127 assumed, not printed in the manual
     bool hwVerified = false;        // true only after the value was tested on the real device
     std::string idFor() const { return id; }
@@ -92,7 +95,7 @@ inline std::vector<Msg> encode(const Param& p, int ch, int val)
     val = std::clamp(val, p.minV, p.maxV);
     if (p.kind == Kind::CC) return { cc(ch, p.a, val) };
     if (p.kind == Kind::NRPN) return nrpn(ch, p.a, p.b, val);
-    return {};
+    return {};   // Pair and Sysex are not channel messages
 }
 
 struct Event { int paramIndex = -1; int value = 0; };

@@ -71,21 +71,25 @@ inline Parsed parse(const Bytes& m)
         if (m[8] == 0x06 && m[9] == 0x6E) p.model = "MODX M6"; else if (m[8] == 0x06 && m[9] == 0x6F) p.model = "MODX M7"; else if (m[8] == 0x06 && m[9] == 0x70) p.model = "MODX M8";
         return p;
     }
-    if (m[1] != kYamahaId || n < 11 || m[3] != kGroupHi || m[4] != kGroupLo || m[5] != kModelModx) return p;
+    if (m[1] != kYamahaId || n < 11 || m[3] != kGroupHi || m[4] != kGroupLo) return p;
     const int kind = m[2] >> 4; p.dev = m[2] & 15;
     auto readAddr = [&](size_t at) { for (size_t i = 0; i < 4; ++i) p.addr[i] = m[at + i]; };
+    // Data List (3-5-4): a bulk dump is F0 43 0n 7F 1C bc bc 0D a1..a4 data cs F7 (byte count BEFORE the model id).
+    // Every other message has the model id right after the group id.
+    if (kind == 0)
+    {
+        if (n < 14 || m[7] != kModelModx) return p;
+        const size_t dataLen = n - 14;                               // 12 header bytes (through address), then data, checksum, F7
+        p.type = SysexType::BulkDump; readAddr(8);
+        p.data.assign(m.begin() + 12, m.begin() + 12 + long(dataLen));
+        // the two byte count (m[5], m[6]) is not interpreted: the doc does not say exactly what it counts
+        p.checksumOk = m[n - 2] == checksum(p.addr, p.data);
+        return p;
+    }
+    if (m[5] != kModelModx) return p;
     if (kind == 1 && n >= 12) { p.type = SysexType::ParameterChange; readAddr(6); p.data.assign(m.begin() + 10, m.end() - 1); }
     else if (kind == 3 && n == 11) { p.type = SysexType::ParameterRequest; readAddr(6); }
     else if (kind == 2 && n == 11) { p.type = SysexType::BulkRequest; readAddr(6); }
-    else if (kind == 0 && n >= 14)
-    {
-        if (n < 14) return p;
-        const size_t dataLen = n - 14;                               // header 12 bytes, then data, checksum, F7
-        p.type = SysexType::BulkDump; readAddr(8);
-        p.data.assign(m.begin() + 12, m.begin() + 12 + long(dataLen));
-        // the two byte count (m[6], m[7]) is not interpreted: the doc does not say exactly what it counts
-        p.checksumOk = m[n - 2] == checksum(p.addr, p.data);
-    }
     return p;
 }
 }

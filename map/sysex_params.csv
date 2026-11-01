@@ -1,0 +1,309 @@
+id,group,name,address,size,min,max,def,hw
+s_06000100,Common,Portamento Switch,06 00 01 00,1,0,1,0,0
+s_06000101,Common,Assignable Switch 1 Mode,06 00 01 01,1,0,1,1,0
+s_06000102,Common,Assignable Switch 2 Mode,06 00 01 02,1,0,1,1,0
+s_06000103,Common,Scene Mixing / AEG Value Mode,06 00 01 03,1,0,1,1,0
+s_06000104,Common,Ribbon Controller Mode,06 00 01 04,1,0,1,1,0
+s_06000105,Common,Reverb Switch,06 00 01 05,1,0,1,1,0
+s_06000106,Common,Variation Switch,06 00 01 06,1,0,1,1,0
+s_06000107,Common,Master EQ Switch,06 00 01 07,1,0,1,1,0
+s_06000108,Common,Master Effect Switch,06 00 01 08,1,0,1,0,0
+s_06000109,Common,Arpeggio Master Switch,06 00 01 09,1,0,1,0,0
+s_0600010a,Common,Motion Seq Master Switch,06 00 01 0A,1,0,1,0,0
+s_0600010b,Common,Assignable Knob1 Link Switch,06 00 01 0B,1,0,1,1,0
+s_0600010c,Common,Assignable Knob2 Link Switch,06 00 01 0C,1,0,1,1,0
+s_0600010d,Common,Assignable Knob3 Link Switch,06 00 01 0D,1,0,1,1,0
+s_0600010e,Common,Assignable Knob4 Link Switch,06 00 01 0E,1,0,1,1,0
+s_0600010f,Common,Assignable Knob5 Link Switch,06 00 01 0F,1,0,1,1,0
+s_06000110,Common,Assignable Knob6 Link Switch,06 00 01 10,1,0,1,1,0
+s_06000111,Common,Assignable Knob7 Link Switch,06 00 01 11,1,0,1,1,0
+s_06000112,Common,Assignable Knob8 Link Switch,06 00 01 12,1,0,1,1,0
+s_06000113,Common,A/D Part Insertion FX A Switch,06 00 01 13,1,0,1,1,0
+s_06000114,Common,A/D Part Insertion FX B Switch,06 00 01 14,1,0,1,1,0
+s_06000115,Common,A/D Part Motion Seq Part Switch,06 00 01 15,1,0,1,1,0
+s_06000116,Common,Super Knob Motion Seq Switch,06 00 01 16,1,0,1,0,0
+s_06000117,Common,Super Knob Motion Seq FX Receive,06 00 01 17,1,0,1,1,0
+s_06000118,Common,Super Knob Motion Seq Trigger Receive,06 00 01 18,1,0,1,0,0
+s_06000119,Common,Super Knob Motion Seq Loop,06 00 01 19,1,0,1,1,0
+s_0600011b,Common,Smart Morph Super Knob Link,06 00 01 1B,1,0,1,0,0
+s_0600011c,Common,Slider Direction Part 1 –8,06 00 01 1C,1,0,1,0,0
+s_06000200,Common,Performance Main Category,06 00 02 00,2,0,16,16,0
+s_06000202,Common,Performance Sub Category,06 00 02 02,2,0,7,0,0
+s_06000204,Common,Selected Part,06 00 02 04,2,0,16,16,0
+s_06000206,Common,Performance Volume,06 00 02 06,2,0,127,127,0
+s_06000208,Common,Performance Pan,06 00 02 08,2,1,127,64,0
+s_0600020a,Common,AEG Attack Time,06 00 02 0A,2,0,127,64,0
+s_0600020c,Common,AEG Decay Time,06 00 02 0C,2,0,127,64,0
+s_0600020e,Common,AEG Sustain Level,06 00 02 0E,2,0,127,64,0
+s_06000210,Common,AEG Release Time,06 00 02 10,2,0,127,64,0
+s_06000212,Common,FEG Attack Time,06 00 02 12,2,0,127,64,0
+s_06000214,Common,FEG Decay Time,06 00 02 14,2,0,127,64,0
+s_06000216,Common,FEG Release Time,06 00 02 16,2,0,127,64,0
+s_06000218,Common,FEG Depth,06 00 02 18,2,0,127,64,0
+s_0600021a,Common,Cutoff Frequency,06 00 02 1A,2,0,127,64,0
+s_0600021c,Common,Resonance,06 00 02 1C,2,0,127,64,0
+s_0600021e,Common,Tempo,06 00 02 1E,2,5,300,120,0
+s_06000220,Common,Portamento Time,06 00 02 20,2,0,127,64,0
+s_06000222,Common,USB Main Monitor Volume,06 00 02 22,2,0,127,127,0
+s_06000224,Common,USB Assign Monitor Volume,06 00 02 24,2,0,127,127,0
+s_06000226,Common,Swing Offset,06 00 02 26,2,8,248,128,0
+s_06000228,Common,"Unit Multiply 100%, 133%, 150%,",06 00 02 28,2,0,9,3,0
+s_0600022a,Common,Scene Select,06 00 02 2A,2,0,7,0,0
+s_0600022c,Common,Audition Phrase Number,06 00 02 2C,2,1,10367,1,0
+s_0600022e,Common,Audition Note Shift,06 00 02 2E,2,40,88,64,0
+s_06000230,Common,Audition Velocity Shift,06 00 02 30,2,0,127,64,0
+s_06000232,Common,Reverb Return,06 00 02 32,2,0,127,64,0
+s_06000234,Common,Reverb Pan,06 00 02 34,2,1,127,64,0
+s_06000238,Common,Variation Return,06 00 02 38,2,0,127,96,0
+s_0600023a,Common,Variation Pan,06 00 02 3A,2,1,127,64,0
+s_0600023c,Common,Send Variation To Reverb,06 00 02 3C,2,0,127,0,0
+s_06000244,Common,Master Effect Envelope Follower Gain,06 00 02 44,2,16,112,64,0
+s_06000246,Common,Master Effect Envelope Follower Attack,06 00 02 46,2,0,19,16,0
+s_06000248,Common,Master Effect Envelope Follower Release,06 00 02 48,2,0,15,7,0
+s_0600024a,Common,VCM Rotary Speaker Switch,06 00 02 4A,2,0,1,0,0
+s_0600024c,Common,Split Points,06 00 02 4C,2,0,3,0,0
+s_0600024e,Common,Split Point 1,06 00 02 4E,2,1,125,60,0
+s_06000250,Common,Split Point 2,06 00 02 50,2,2,126,72,0
+s_06000252,Common,Split Point 3,06 00 02 52,2,3,127,84,0
+s_06000a00,Master EQ,Master EQ Low Gain,06 00 0A 00,2,52,76,64,0
+s_06000a02,Master EQ,Master EQ Low Frequency,06 00 0A 02,2,4,40,12,0
+s_06000a04,Master EQ,Master EQ Low Q available,06 00 0A 04,2,1,120,7,0
+s_06000a06,Master EQ,Master EQ Low Shape,06 00 0A 06,2,0,1,0,0
+s_06000a08,Master EQ,Master EQ Low Mid Gain,06 00 0A 08,2,52,76,64,0
+s_06000a0a,Master EQ,Master EQ Low Mid Frequency,06 00 0A 0A,2,14,54,20,0
+s_06000a0c,Master EQ,Master EQ Low Mid Q,06 00 0A 0C,2,1,120,7,0
+s_06000a0e,Master EQ,Master EQ Mid Gain,06 00 0A 0E,2,52,76,64,0
+s_06000a10,Master EQ,Master EQ Mid Frequency,06 00 0A 10,2,14,54,28,0
+s_06000a12,Master EQ,Master EQ Mid Q,06 00 0A 12,2,1,120,7,0
+s_06000a14,Master EQ,Master EQ High Mid Gain,06 00 0A 14,2,52,76,64,0
+s_06000a16,Master EQ,Master EQ High Mid Frequency,06 00 0A 16,2,14,54,44,0
+s_06000a18,Master EQ,Master EQ High Mid Q,06 00 0A 18,2,1,120,7,0
+s_06000a1a,Master EQ,Master EQ High Gain −12 – +12 [dB],06 00 0A 1A,2,52,76,64,0
+s_06000a1c,Master EQ,Master EQ High Frequency,06 00 0A 1C,2,28,58,52,0
+s_06000a1e,Master EQ,Master EQ High Q available,06 00 0A 1E,2,1,120,7,0
+s_06000a20,Master EQ,Master EQ High Shape,06 00 0A 20,2,0,1,0,0
+s_06000c00,Motion Seq,Motion Seq Select,06 00 0C 00,2,0,7,0,0
+s_06000c02,Motion Seq,Motion Seq Amplitude Performance Offset,06 00 0C 02,2,1,255,128,0
+s_06000c04,Motion Seq,Motion Seq Pulse Shape Performance Offset,06 00 0C 04,2,14,114,64,0
+s_06000c06,Motion Seq,Motion Seq Smoothness Performance Offset,06 00 0C 06,2,1,255,128,0
+s_06000c08,Motion Seq,Motion Seq Random Performance Offset,06 00 0C 08,2,1,255,128,0
+s_06000c0a,Motion Seq,Motion Seq View Lane Common,06 00 0C 0A,2,0,4,0,0
+s_06000d00,Super Knob,Super Knob Value,06 00 0D 00,2,0,1023,512,0
+s_06000d02,Super Knob,Super Knob Mid Position,06 00 0D 02,2,0,1022,0,0
+s_06000d04,Super Knob,Assignable Knob 1 Destination Left Value,06 00 0D 04,2,0,1023,0,0
+s_06000d06,Super Knob,Assignable Knob 1 Destination Mid Value,06 00 0D 06,2,0,1023,512,0
+s_06000d08,Super Knob,Assignable Knob 1 Destination Right Value,06 00 0D 08,2,0,1023,1023,0
+s_06000d0a,Super Knob,Assignable Knob 2 Destination Left Value,06 00 0D 0A,2,0,1023,0,0
+s_06000d0c,Super Knob,Assignable Knob 2 Destination Mid Value,06 00 0D 0C,2,0,1023,512,0
+s_06000d0e,Super Knob,Assignable Knob 2 Destination Right Value,06 00 0D 0E,2,0,1023,1023,0
+s_06000d10,Super Knob,Assignable Knob 3 Destination Left Value,06 00 0D 10,2,0,1023,0,0
+s_06000d12,Super Knob,Assignable Knob 3 Destination Mid Value,06 00 0D 12,2,0,1023,512,0
+s_06000d14,Super Knob,Assignable Knob 3 Destination Right Value,06 00 0D 14,2,0,1023,1023,0
+s_06000d16,Super Knob,Assignable Knob 4 Destination Left Value,06 00 0D 16,2,0,1023,0,0
+s_06000d18,Super Knob,Assignable Knob 4 Destination Mid Value,06 00 0D 18,2,0,1023,512,0
+s_06000d1a,Super Knob,Assignable Knob 4 Destination Right Value,06 00 0D 1A,2,0,1023,1023,0
+s_06000d1c,Super Knob,Assignable Knob 5 Destination Left Value,06 00 0D 1C,2,0,1023,0,0
+s_06000d1e,Super Knob,Assignable Knob 5 Destination Mid Value,06 00 0D 1E,2,0,1023,512,0
+s_06000d20,Super Knob,Assignable Knob 5 Destination Right Value,06 00 0D 20,2,0,1023,1023,0
+s_06000d22,Super Knob,Assignable Knob 6 Destination Left Value,06 00 0D 22,2,0,1023,0,0
+s_06000d24,Super Knob,Assignable Knob 6 Destination Mid Value,06 00 0D 24,2,0,1023,512,0
+s_06000d26,Super Knob,Assignable Knob 6 Destination Right Value,06 00 0D 26,2,0,1023,1023,0
+s_06000d28,Super Knob,Assignable Knob 7 Destination Left Value,06 00 0D 28,2,0,1023,0,0
+s_06000d2a,Super Knob,Assignable Knob 7 Destination Mid Value,06 00 0D 2A,2,0,1023,512,0
+s_06000d2c,Super Knob,Assignable Knob 7 Destination Right Value,06 00 0D 2C,2,0,1023,1023,0
+s_06000d2e,Super Knob,Assignable Knob 8 Destination Left Value,06 00 0D 2E,2,0,1023,0,0
+s_06000d30,Super Knob,Assignable Knob 8 Destination Mid Value,06 00 0D 30,2,0,1023,512,0
+s_06000d32,Super Knob,Assignable Knob 8 Destination Right Value,06 00 0D 32,2,0,1023,1023,0
+s_06000d34,Super Knob,Super Knob LED Pattern,06 00 0D 34,2,0,44,1,0
+s_06000d36,Super Knob,Super Knob Motion Seq 0 – 127 Random,06 00 0D 36,2,0,127,0,0
+s_06000d38,Super Knob,Number of Waypoints,06 00 0D 38,2,0,6,0,0
+s_06000d3a,Super Knob,Start X,06 00 0D 3A,2,0,31,0,0
+s_06000d3c,Super Knob,Start Y,06 00 0D 3C,2,0,31,0,0
+s_06000d3e,Super Knob,End X,06 00 0D 3E,2,0,31,31,0
+s_06000d40,Super Knob,End Y,06 00 0D 40,2,0,31,31,0
+s_06000d42,Super Knob,Waypoint 1 X,06 00 0D 42,2,0,31,15,0
+s_06000d44,Super Knob,Waypoint 1 Y,06 00 0D 44,2,0,31,7,0
+s_06000d46,Super Knob,Waypoint 2 X,06 00 0D 46,2,0,31,23,0
+s_06000d48,Super Knob,Waypoint 2 Y,06 00 0D 48,2,0,31,7,0
+s_06000d4a,Super Knob,Waypoint 3 X,06 00 0D 4A,2,0,31,23,0
+s_06000d4c,Super Knob,Waypoint 3 Y,06 00 0D 4C,2,0,31,15,0
+s_06000d4e,Super Knob,Waypoint 4 X,06 00 0D 4E,2,0,31,15,0
+s_06000d50,Super Knob,Waypoint 4 Y,06 00 0D 50,2,0,31,23,0
+s_06000d52,Super Knob,Waypoint 5 X,06 00 0D 52,2,0,31,7,0
+s_06000d54,Super Knob,Waypoint 5 Y,06 00 0D 54,2,0,31,23,0
+s_06000d56,Super Knob,Waypoint 6 X,06 00 0D 56,2,0,31,7,0
+s_06000d58,Super Knob,Waypoint 6 Y,06 00 0D 58,2,0,31,15,0
+s_1p000100,Part,Part Switch,1p 00 01 00,1,0,1,1,0
+s_1p000101,Part,Part Mode,1p 00 01 01,1,0,1,0,0
+s_1p000102,Part,Keyboard Control Switch,1p 00 01 02,1,0,1,1,0
+s_1p000103,Part,Mute Switch,1p 00 01 03,1,0,1,0,0
+s_1p000104,Part,Insertion FX A Switch,1p 00 01 04,1,0,1,1,0
+s_1p000105,Part,Insertion FX B Switch,1p 00 01 05,1,0,1,1,0
+s_1p000106,Part,Element Pan Switch,1p 00 01 06,1,0,1,1,0
+s_1p000107,Part,Motion Seq Part Switch,1p 00 01 07,1,0,1,1,0
+s_1p000108,Part,Key Assign Mode,1p 00 01 08,1,0,1,1,0
+s_1p000109,Part,Mono/Poly Mode,1p 00 01 09,1,0,1,1,0
+s_1p00010a,Part,Portamento Switch,1p 00 01 0A,1,0,1,1,0
+s_1p00010b,Part,Receive Pitch Bend,1p 00 01 0B,1,0,1,1,0
+s_1p00010c,Part,Receive After Touch,1p 00 01 0C,1,0,1,1,0
+s_1p00010d,Part,Receive PAT,1p 00 01 0D,1,0,1,1,0
+s_1p00010e,Part,Receive Program Change,1p 00 01 0E,1,0,1,1,0
+s_1p00010f,Part,Receive Bank Select,1p 00 01 0F,1,0,1,1,0
+s_1p000110,Part,Receive Control Change,1p 00 01 10,1,0,1,1,0
+s_1p000111,Part,Receive Assignable Knob 1,1p 00 01 11,1,0,1,1,0
+s_1p000112,Part,Receive Assignable Knob 2,1p 00 01 12,1,0,1,1,0
+s_1p000113,Part,Receive Assignable Knob 3,1p 00 01 13,1,0,1,1,0
+s_1p000114,Part,Receive Assignable Knob 4,1p 00 01 14,1,0,1,1,0
+s_1p000115,Part,Receive Assignable Knob 5,1p 00 01 15,1,0,1,1,0
+s_1p000116,Part,Receive Assignable Knob 6,1p 00 01 16,1,0,1,1,0
+s_1p000117,Part,Receive Assignable Knob 7,1p 00 01 17,1,0,1,1,0
+s_1p000118,Part,Receive Assignable Knob 8,1p 00 01 18,1,0,1,1,0
+s_1p000119,Part,Receive Foot Controller 1,1p 00 01 19,1,0,1,1,0
+s_1p00011a,Part,Receive Foot Controller 2,1p 00 01 1A,1,0,1,1,0
+s_1p00011b,Part,Receive Modulation Wheel,1p 00 01 1B,1,0,1,1,0
+s_1p00011c,Part,Receive Sustain / Sostenuto,1p 00 01 1C,1,0,1,1,0
+s_1p00011d,Part,Receive Pan,1p 00 01 1D,1,0,1,1,0
+s_1p00011e,Part,Receive Volume / Expression,1p 00 01 1E,1,0,1,1,0
+s_1p00011f,Part,Receive Ribbon Controller,1p 00 01 1F,1,0,1,1,0
+s_1p000120,Part,Receive Breath Controller,1p 00 01 20,1,0,1,1,0
+s_1p000121,Part,Receive Foot Switch,1p 00 01 21,1,0,1,1,0
+s_1p000122,Part,Receive Assignable Function 1,1p 00 01 22,1,0,1,1,0
+s_1p000123,Part,Receive Assignable Function 2,1p 00 01 23,1,0,1,1,0
+s_1p000124,Part,Insertion Effect Assign Sw for MODX M,1p 00 01 24,1,0,1,1,0
+s_1p000125,Part,Receive Motion Seq Trigger,1p 00 01 25,1,0,1,1,0
+s_1p000126,Part,Receive Portamento Switch,1p 00 01 26,1,0,1,1,0
+s_1p000127,Part,Receive Portamento Time,1p 00 01 27,1,0,1,1,0
+s_1p000128,Part,LFO Tempo Sync,1p 00 01 28,1,0,1,0,0
+s_1p000129,Part,LFO Loop Switch,1p 00 01 29,1,0,1,0,0
+s_1p00012a,Part,Transmit Pitch Bend,1p 00 01 2A,1,0,1,1,0
+s_1p00012b,Part,Transmit After Touch,1p 00 01 2B,1,0,1,1,0
+s_1p00012c,Part,Transmit PAT,1p 00 01 2C,1,0,1,1,0
+s_1p00012d,Part,Transmit Program Change,1p 00 01 2D,1,0,1,1,0
+s_1p00012e,Part,Transmit Bank Select,1p 00 01 2E,1,0,1,1,0
+s_1p00012f,Part,Transmit Control Change,1p 00 01 2F,1,0,1,1,0
+s_1p000130,Part,Transmit Assignable Knob 1,1p 00 01 30,1,0,1,1,0
+s_1p000131,Part,Transmit Assignable Knob 2,1p 00 01 31,1,0,1,1,0
+s_1p000132,Part,Transmit Assignable Knob 3,1p 00 01 32,1,0,1,1,0
+s_1p000133,Part,Transmit Assignable Knob 4,1p 00 01 33,1,0,1,1,0
+s_1p000134,Part,Transmit Assignable Knob 5,1p 00 01 34,1,0,1,1,0
+s_1p000135,Part,Transmit Assignable Knob 6,1p 00 01 35,1,0,1,1,0
+s_1p000136,Part,Transmit Assignable Knob 7,1p 00 01 36,1,0,1,1,0
+s_1p000137,Part,Transmit Assignable Knob 8,1p 00 01 37,1,0,1,1,0
+s_1p000138,Part,Transmit Foot Controller 1,1p 00 01 38,1,0,1,1,0
+s_1p000139,Part,Transmit Foot Controller 2,1p 00 01 39,1,0,1,1,0
+s_1p00013a,Part,Transmit Modulation Wheel,1p 00 01 3A,1,0,1,1,0
+s_1p00013b,Part,Transmit Sustain/Sostenuto,1p 00 01 3B,1,0,1,1,0
+s_1p00013c,Part,Transmit Pan,1p 00 01 3C,1,0,1,1,0
+s_1p00013d,Part,Transmit Volume/Expression,1p 00 01 3D,1,0,1,1,0
+s_1p00013e,Part,Transmit Ribbon Controller,1p 00 01 3E,1,0,1,1,0
+s_1p00013f,Part,Transmit Breath Controller,1p 00 01 3F,1,0,1,1,0
+s_1p000140,Part,Transmit Foot Switch,1p 00 01 40,1,0,1,1,0
+s_1p000141,Part,Transmit Assignable Function 1,1p 00 01 41,1,0,1,1,0
+s_1p000142,Part,Transmit Assignable Function 2,1p 00 01 42,1,0,1,1,0
+s_1p000144,Part,Transmit Motion Seq Trigger,1p 00 01 44,1,0,1,1,0
+s_1p000145,Part,Transmit Portamento Switch,1p 00 01 45,1,0,1,1,0
+s_1p000146,Part,Transmit Portamento Time,1p 00 01 46,1,0,1,1,0
+s_1p000147,Part,Part Arp Switch,1p 00 01 47,1,0,1,1,0
+s_1p000148,Part,Arp Play Only,1p 00 01 48,1,0,1,0,0
+s_1p000149,Part,Arp Fixed SD/BD,1p 00 01 49,1,0,1,0,0
+s_1p00014a,Part,Arp Loop,1p 00 01 4A,1,0,1,1,0
+s_1p00014b,Part,Arp Accent Start Quantize,1p 00 01 4B,1,0,1,1,0
+s_1p00014c,Part,Arp Random SFX,1p 00 01 4C,1,0,1,1,0
+s_1p00014d,Part,Arp Random SFX Key On Control,1p 00 01 4D,1,0,1,1,0
+s_1p00014e,Part,Slider Direction,1p 00 01 4E,1,0,1,0,0
+s_1p00014f,Part,Expression Type,1p 00 01 4F,1,0,1,0,0
+s_1p000150,Part,Extended Element Switch,1p 00 01 50,1,0,1,0,0
+s_1p000200,Part,Part Main Category Refer to,1p 00 02 00,2,0,16,16,0
+s_1p000202,Part,Part Sub Category Refer to,1p 00 02 02,2,0,7,0,0
+s_1p000204,Part,Velocity Limit Low,1p 00 02 04,2,1,127,1,0
+s_1p000206,Part,Velocity Limit High,1p 00 02 06,2,1,127,127,0
+s_1p000208,Part,Note Limit Low,1p 00 02 08,2,0,127,0,0
+s_1p00020a,Part,Note Limit High,1p 00 02 0A,2,0,127,127,0
+s_1p000210,Part,Volume,1p 00 02 10,2,0,127,100,0
+s_1p000212,Part,Pan,1p 00 02 12,2,1,127,64,0
+s_1p000214,Part,Reverb Send,1p 00 02 14,2,0,127,0,0
+s_1p000216,Part,Variation Send,1p 00 02 16,2,0,127,0,0
+s_1p000218,Part,Dry Level,1p 00 02 18,2,0,127,127,0
+s_1p00021a,Part,Envelope Follower Gain,1p 00 02 1A,2,16,112,64,0
+s_1p00021c,Part,Envelope Follower Attack,1p 00 02 1C,2,0,19,16,0
+s_1p00021e,Part,Envelope Follower Release,1p 00 02 1E,2,0,15,7,0
+s_1p000220,Part,Part Output Select 8: AsgnL&R,1p 00 02 20,2,0,127,0,0
+s_1p000222,Part,AEG Attack Time,1p 00 02 22,2,0,127,64,0
+s_1p000224,Part,AEG Decay Time,1p 00 02 24,2,0,127,64,0
+s_1p000226,Part,AEG Sustain Level for Drum Part,1p 00 02 26,2,0,127,64,0
+s_1p000228,Part,AEG Release Time for Drum Part,1p 00 02 28,2,0,127,64,0
+s_1p00022a,Part,FEG Attack Time only for AWM,1p 00 02 2A,2,0,127,64,0
+s_1p00022c,Part,FEG Decay Time only for AWM,1p 00 02 2C,2,0,127,64,0
+s_1p00022e,Part,FEG Sustain Level only for AWM,1p 00 02 2E,2,0,127,64,0
+s_1p000230,Part,FEG Release Time only for AWM,1p 00 02 30,2,0,127,64,0
+s_1p000232,Part,FEG Depth for Drum Part,1p 00 02 32,2,0,127,64,0
+s_1p000234,Part,Filter Cutoff Frequency,1p 00 02 34,2,0,127,64,0
+s_1p000236,Part,Filter Resonance/ Width,1p 00 02 36,2,0,127,64,0
+s_1p000238,Part,Assignable Knob 1 Value,1p 00 02 38,2,0,1023,512,0
+s_1p00023a,Part,Assignable Knob 2 Value,1p 00 02 3A,2,0,1023,512,0
+s_1p00023c,Part,Assignable Knob 3 Value,1p 00 02 3C,2,0,1023,512,0
+s_1p00023e,Part,Assignable Knob 4 Value,1p 00 02 3E,2,0,1023,512,0
+s_1p000240,Part,Assignable Knob 5 Value,1p 00 02 40,2,0,1023,512,0
+s_1p000242,Part,Assignable Knob 6 Value,1p 00 02 42,2,0,1023,512,0
+s_1p000244,Part,Assignable Knob 7 Value,1p 00 02 44,2,0,1023,512,0
+s_1p000248,Part,Swing,1p 00 02 48,2,8,248,128,0
+s_1p00024a,Part,Motion Seq Amplitude,1p 00 02 4A,2,1,255,128,0
+s_1p00024c,Part,Motion Seq Pulse Shape,1p 00 02 4C,2,14,114,64,0
+s_1p00024e,Part,Motion Seq Smooth,1p 00 02 4E,2,1,255,128,0
+s_1p000250,Part,Motion Seq Random,1p 00 02 50,2,0,127,0,0
+s_1p000252,Part,MotionSeq View Lane,1p 00 02 52,2,0,3,0,0
+s_1p000254,Part,Expression Curve,1p 00 02 54,2,0,1,0,0
+s_1p000256,Part,Element Count,1p 00 02 56,2,8,128,8,0
+s_1p000258,Part,Pitch Control Group,1p 00 02 58,2,0,16,0,0
+s_1p00025a,Part,Arpeggio Group,1p 00 02 5A,2,0,16,0,0
+s_1p00025c,Part,Note Range Group Group D,1p 00 02 5C,2,0,15,0,0
+s_1p000600,Part Arp,Arp Hold,1p 00 06 00,2,0,2,1,0
+s_1p000602,Part Arp,"Arp Unit Multiply 100%, 133%, 150%,",1p 00 06 02,2,0,10,3,0
+s_1p000604,Part Arp,Arp Note Limit Low,1p 00 06 04,2,0,127,0,0
+s_1p000606,Part Arp,Arp Note Limit High,1p 00 06 06,2,0,127,127,0
+s_1p000608,Part Arp,Arp Velocity Limit Low,1p 00 06 08,2,1,127,1,0
+s_1p00060a,Part Arp,Arp Velocity Limit High 1 – 127,1p 00 06 0A,2,1,127,127,0
+s_1p00060c,Part Arp,"Arp Key Mode Sort+Drct, Thru+Drct",1p 00 06 0C,2,0,4,0,0
+s_1p00060e,Part Arp,Arp Velocity Mode,1p 00 06 0E,2,0,1,0,0
+s_1p000610,Part Arp,Arp Change Timing,1p 00 06 10,2,0,1,1,0
+s_1p000612,Part Arp,"Arp Quantize Value 320, 480",1p 00 06 12,2,1,7,3,0
+s_1p000614,Part Arp,Arp Quantize Strength 0 – 100%,1p 00 06 14,2,0,100,0,0
+s_1p000616,Part Arp,Arp Velocity Rate,1p 00 06 16,2,0,200,100,0
+s_1p000618,Part Arp,Arp Gate Time Rate,1p 00 06 18,2,0,200,100,0
+s_1p00061a,Part Arp,Arp Accent Velocity Threshold,1p 00 06 1A,2,0,127,64,0
+s_1p00061c,Part Arp,Arp Octave Range,1p 00 06 1C,2,61,67,64,0
+s_1p00061e,Part Arp,Arp Output Octave Shift,1p 00 06 1E,2,54,74,64,0
+s_1p000620,Part Arp,Arp Trigger Mode,1p 00 06 20,2,0,1,0,0
+s_1p000622,Part Arp,Arp Random SFX Velocity Offset,1p 00 06 22,2,0,127,64,0
+s_1p000624,Part Arp,Arp 1 Velocity Rate Offset,1p 00 06 24,2,28,228,128,0
+s_1p000626,Part Arp,Arp 1 Gate Time Rate Offset,1p 00 06 26,2,28,228,128,0
+s_1p000628,Part Arp,Arp 2 Velocity Rate Offset,1p 00 06 28,2,28,228,128,0
+s_1p00062a,Part Arp,Arp 2 Gate Time Rate Offset,1p 00 06 2A,2,28,228,128,0
+s_1p00062c,Part Arp,Arp 3 Velocity Rate Offset,1p 00 06 2C,2,28,228,128,0
+s_1p00062e,Part Arp,Arp 3 Gate Time Rate Offset,1p 00 06 2E,2,28,228,128,0
+s_1p000630,Part Arp,Arp 4 Velocity Rate Offset,1p 00 06 30,2,28,228,128,0
+s_1p000632,Part Arp,Arp 4 Gate Time Rate Offset,1p 00 06 32,2,28,228,128,0
+s_1p000634,Part Arp,Arp 5 Velocity Rate Offset,1p 00 06 34,2,28,228,128,0
+s_1p000636,Part Arp,Arp 5 Gate Time Rate Offset,1p 00 06 36,2,28,228,128,0
+s_1p000638,Part Arp,Arp 6 Velocity Rate Offset,1p 00 06 38,2,28,228,128,0
+s_1p00063a,Part Arp,Arp 6 Gate Time Rate Offset,1p 00 06 3A,2,28,228,128,0
+s_1p00063c,Part Arp,Arp 7 Velocity Rate Offset,1p 00 06 3C,2,28,228,128,0
+s_1p00063e,Part Arp,Arp 7 Gate Time Rate Offset,1p 00 06 3E,2,28,228,128,0
+s_1p000640,Part Arp,Arp 8 Velocity Rate Offset,1p 00 06 40,2,28,228,128,0
+s_1p000642,Part Arp,Arp 8 Gate Time Rate Offset,1p 00 06 42,2,28,228,128,0
+s_1p000644,Part Arp,"Arp 1 Number 10239), User, Library",1p 00 06 44,2,0,16383,0,0
+s_1p000646,Part Arp,"Arp 2 Number 10239), User, Library",1p 00 06 46,2,0,16383,0,0
+s_1p000648,Part Arp,"Arp 3 Number 10239), User, Library",1p 00 06 48,2,0,16383,0,0
+s_1p00064a,Part Arp,"Arp 4 Number 10239), User, Library",1p 00 06 4A,2,0,16383,0,0
+s_1p00064c,Part Arp,"Arp 5 Number 10239), User, Library",1p 00 06 4C,2,0,16383,0,0
+s_1p00064e,Part Arp,"Arp 6 Number 10239), User, Library",1p 00 06 4E,2,0,16383,0,0
+s_1p000650,Part Arp,"Arp 7 Number 10239), User, Library",1p 00 06 50,2,0,16383,0,0
+s_1p000652,Part Arp,"Arp 8 Number 10239), User, Library",1p 00 06 52,2,0,16383,0,0
+s_1p000654,Part Arp,Arp 1 Number Extra 2048=Library17-1 …,1p 00 06 54,2,0,2048,0,0
+s_1p000656,Part Arp,Arp 2 Number Extra 2048=Library17-1 …,1p 00 06 56,2,0,2048,0,0
+s_1p000658,Part Arp,Arp 3 Number Extra 2048=Library17-1 …,1p 00 06 58,2,0,2048,0,0
+s_1p00065a,Part Arp,Arp 4 Number Extra 2048=Library17-1 …,1p 00 06 5A,2,0,2048,0,0
+s_1p00065c,Part Arp,Arp 5 Number Extra 2048=Library17-1 …,1p 00 06 5C,2,0,2048,0,0
+s_1p00065e,Part Arp,Arp 6 Number Extra 2048=Library17-1 …,1p 00 06 5E,2,0,2048,0,0
+s_1p000660,Part Arp,Arp 7 Number Extra 2048=Library17-1 …,1p 00 06 60,2,0,2048,0,0
+s_1p000662,Part Arp,Arp 8 Number Extra 2048=Library17-1 …,1p 00 06 62,2,0,2048,0,0

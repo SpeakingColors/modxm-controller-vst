@@ -19,7 +19,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/JUCE/CMakeLists.txt)
     FetchContent_Declare(cat_ui GIT_REPOSITORY https://github.com/SpeakingColors/cat-ui GIT_TAG main GIT_SHALLOW TRUE)
     FetchContent_MakeAvailable(cat_ui)
 
-    juce_add_binary_data(ModxMControllerData SOURCES map/params.csv map/sysex_params.csv)
+    juce_add_binary_data(ModxMControllerData SOURCES map/params.csv map/sysex_params.csv assets/fonts/RobotoCondensed-Regular.ttf assets/fonts/RobotoCondensed-Medium.ttf assets/fonts/RobotoCondensed-Bold.ttf)
     set_target_properties(ModxMControllerData PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     juce_add_plugin(ModxMController
@@ -37,4 +37,11 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/JUCE/CMakeLists.txt)
     target_include_directories(ModxMController PRIVATE src)
     target_compile_definitions(ModxMController PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0)
     target_link_libraries(ModxMController PRIVATE ModxMControllerData cat_ui::cat_ui juce::juce_audio_utils juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+
+    # Dev tool: renders the Home page offscreen for the mockup comparison (build with --target render_home)
+    juce_add_console_app(render_home PRODUCT_NAME render_home)
+    target_sources(render_home PRIVATE tools/render_home.cpp)
+    target_include_directories(render_home PRIVATE src)
+    target_compile_definitions(render_home PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+    target_link_libraries(render_home PRIVATE cat_ui::cat_ui juce::juce_gui_basics juce::juce_recommended_config_flags)
 endif()

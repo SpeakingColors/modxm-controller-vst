@@ -3,11 +3,14 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <atomic>
 #include <memory>
+#include <map>
+#include <set>
 #include "BinaryData.h"
 #include "MidiCore.h"
 #include "SysexMap.h"
 #include "catui/CatFrame.h"
 #include "catui/RenderGate.h"
+#include "HomePage.h"
 
 namespace
 {
@@ -183,10 +186,11 @@ public:
     std::unique_ptr<juce::SliderParameterAttachment> attach;
 };
 
-class CtlEditor : public juce::AudioProcessorEditor, private juce::ListBoxModel
+// Developer list of every parameter (kept for testing the map; opened from the gear menu, never the main window)
+class DevListEditor : public juce::Component, private juce::ListBoxModel
 {
 public:
-    explicit CtlEditor(CtlProcessor& p) : AudioProcessorEditor(p), proc(p), frame("MODX M Controller", 760, 560)
+    explicit DevListEditor(CtlProcessor& p) : proc(p), frame("MODX M Controller", 760, 560)
     {
         addAndMakeVisible(frame); auto& c = frame.content();
         std::set<juce::String> groups; for (auto& s : proc.slots) groups.insert(juce::String(proc.mapRes.params[size_t(s.map)].group));
@@ -209,7 +213,7 @@ public:
         list.setModel(this); list.setRowHeight(30);
         frame.header().onInfo = [this] { juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "MODX M Controller",
             "Free and open source by Studio 87. Values come from the maker's manual. Nothing is sent that is not in the map, and nothing is invented. Support: ko-fi.com/studio87"); };
-        rebuild(); setResizable(true, true); getConstrainer()->setFixedAspectRatio(760.0 / 560.0); setResizeLimits(380, 280, 1900, 1400); setSize(760, 560);
+        rebuild(); setSize(760, 560);
     }
     void resized() override
     {
@@ -248,5 +252,85 @@ private:
     std::unique_ptr<juce::SliderParameterAttachment> chAttach, partAttach, devAttach; juce::ListBox list; std::vector<int> shown;
 };
 
-juce::AudioProcessorEditor* CtlProcessor::createEditor() { return new CtlEditor(*this); }
+//==============================================================================
+// Bridges the Home page to the processor's parameters (by the ids in map/*.csv)
+class ProcModel : public modx::HomeModel
+{
+public:
+    explicit ProcModel(CtlProcessor& p) : proc(p) { for (size_t i = 0; i < p.slots.size(); ++i) byId[p.slots[i].param->paramID] = i; }
+    bool has(const juce::String& id) const override { return byId.count(id) > 0; }
+    float getNorm(const juce::String& id) const override { return par(id).getValue(); }
+    float defaultNorm(const juce::String& id) const override { return par(id).getDefaultValue(); }
+    juce::String valueText(const juce::String& id, float norm) const override
+    {
+        const int v = par(id).convertFrom0to1(norm);
+        if (id == "s_06000208") return v == 64 ? juce::String("C") : v < 64 ? "L" + juce::String(64 - v) : "R" + juce::String(v - 64);   // Performance Pan: 64 is centre
+        return juce::String(v);
+    }
+    juce::String describe(const juce::String& id) const override
+    {
+        const auto& s = proc.slots[byId.at(id)]; const auto& m = proc.mapRes.params[size_t(s.map)]; const auto r = s.param->getRange();
+        auto hex = [](int v) { return juce::String::toHexString(v).paddedLeft('0', 2).toUpperCase(); };
+        juce::String a = m.kind == ctl::Kind::CC ? "CC " + juce::String(m.a) : m.kind == ctl::Kind::NRPN ? "NRPN " + juce::String(m.a) + ":" + juce::String(m.b)
+            : "SysEx " + hex(m.sysAddr[0]) + " " + hex(m.sysAddr[1]) + " " + hex(m.sysAddr[2]) + " " + hex(m.sysAddr[3]) + (m.perPart ? " (selected part)" : "");
+        return juce::String(m.name) + "\nRange " + juce::String(r.getStart()) + " to " + juce::String(r.getEnd()) + ", now " + juce::String(s.param->get()) + "\n" + a + (m.hwVerified ? "" : ", not tested on the device yet");
+    }
+    void beginEdit(const juce::String& id) override { par(id).beginChangeGesture(); }
+    void setNorm(const juce::String& id, float n) override { par(id).setValueNotifyingHost(n); }
+    void endEdit(const juce::String& id) override { par(id).endChangeGesture(); }
+private:
+    juce::AudioParameterInt& par(const juce::String& id) const { return *proc.slots[byId.at(id)].param; }
+    CtlProcessor& proc; std::map<juce::String, size_t> byId;
+};
+
+// The plugin window: the Home page ported from the approved mockup, resizable, double click the wood for 100 %
+class HomeEditor : public juce::AudioProcessorEditor
+{
+public:
+    explicit HomeEditor(CtlProcessor& p) : AudioProcessorEditor(p), proc(p), model(p), page(model)
+    {
+        static const bool once = []
+        {
+            modx::HomePage::setFonts(juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoCondensedRegular_ttf, size_t(BinaryData::RobotoCondensedRegular_ttfSize)),
+                                     juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoCondensedMedium_ttf, size_t(BinaryData::RobotoCondensedMedium_ttfSize)),
+                                     juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoCondensedBold_ttf, size_t(BinaryData::RobotoCondensedBold_ttfSize)));
+            return true;
+        }();
+        juce::ignoreUnused(once);
+        addAndMakeVisible(page);
+        page.onReset100 = page.onWoodDoubleClick = [this] { setSize(modx::HomePage::kTotalW, modx::HomePage::kTotalH); };
+        page.onInfo = [] { juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "MODX M Controller",
+            "Free and open source by Studio 87. Values come from the Yamaha MODX M Data List. Nothing is sent that is not in the map, and nothing is invented. No data is collected, ever. Support: ko-fi.com/studio87"); };
+        page.onGear = [this] { showMenu(); };
+        setResizable(true, false);   // edges and corners come from the border below
+        getConstrainer()->setFixedAspectRatio(double(modx::HomePage::kTotalW) / double(modx::HomePage::kTotalH));
+        setResizeLimits(modx::HomePage::kTotalW / 2, modx::HomePage::kTotalH / 2, modx::HomePage::kTotalW * 2, modx::HomePage::kTotalH * 2);
+        border = std::make_unique<juce::ResizableBorderComponent>(this, getConstrainer()); border->setBorderThickness(juce::BorderSize<int>(4));
+        addAndMakeVisible(*border);
+        setSize(modx::HomePage::kTotalW, modx::HomePage::kTotalH);
+    }
+    void resized() override { page.setBounds(getLocalBounds()); border->setBounds(getLocalBounds()); }
+
+private:
+    void showMenu()
+    {
+        juce::PopupMenu m, ch, dv, pt;
+        for (int i = 1; i <= 16; ++i) { ch.addItem(100 + i, juce::String(i), true, proc.channelParam->get() == i); dv.addItem(200 + i, juce::String(i), true, proc.deviceParam->get() == i); pt.addItem(300 + i, juce::String(i), true, proc.partParam->get() == i); }
+        m.addSubMenu("MIDI channel (CC controls)", ch); m.addSubMenu("Device number (SysEx), must match the MODX M", dv); m.addSubMenu("Part for part controls", pt);
+        m.addSeparator(); m.addItem(1, "Send all values to the device now"); m.addItem(2, "Info bubbles", true, page.bubblesOn); m.addItem(3, "Developer parameter list...");
+        m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&page).withMinimumWidth(260), [this](int r)
+        {
+            if (r >= 101 && r <= 116) *proc.channelParam = r - 100; else if (r >= 201 && r <= 216) *proc.deviceParam = r - 200; else if (r >= 301 && r <= 316) *proc.partParam = r - 300;
+            else if (r == 1) proc.sendAll(); else if (r == 2) { page.bubblesOn = !page.bubblesOn; page.repaint(); }
+            else if (r == 3)
+            {
+                juce::DialogWindow::LaunchOptions lo; lo.dialogTitle = "MODX M Controller: parameter list"; lo.content.setOwned(new DevListEditor(proc));
+                lo.resizable = true; lo.useNativeTitleBar = true; lo.escapeKeyTriggersCloseButton = true; lo.launchAsync();
+            }
+        });
+    }
+    CtlProcessor& proc; ProcModel model; modx::HomePage page; std::unique_ptr<juce::ResizableBorderComponent> border;
+};
+
+juce::AudioProcessorEditor* CtlProcessor::createEditor() { return new HomeEditor(*this); }
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new CtlProcessor(); }

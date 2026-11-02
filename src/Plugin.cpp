@@ -279,7 +279,7 @@ public:
     void setNorm(const juce::String& id, float n) override { par(id).setValueNotifyingHost(n); }
     void endEdit(const juce::String& id) override { par(id).endChangeGesture(); }
 private:
-    juce::AudioParameterInt& par(const juce::String& id) const { return *proc.slots[byId.at(id)].param; }
+    juce::RangedAudioParameter& par(const juce::String& id) const { return *static_cast<juce::RangedAudioParameter*>(proc.slots[byId.at(id)].param); }
     CtlProcessor& proc; std::map<juce::String, size_t> byId;
 };
 

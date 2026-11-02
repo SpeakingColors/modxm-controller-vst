@@ -5,6 +5,7 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <array>
 #include "BinaryData.h"
 #include "MidiCore.h"
 #include "SysexMap.h"
@@ -45,6 +46,10 @@ public:
             Slot s; s.param = ip.get(); s.map = int(&p - mapRes.params.data()); slots.push_back(s);
             addParameter(ip.release());
         }
+        for (int k = 0; k < kBank; ++k)
+            for (size_t i = 0; i < mapRes.params.size(); ++i) if (mapRes.params[i].id == kBankIds[k]) bankMap[k] = int(i);
+        for (int part = 0; part < 16; ++part) for (int k = 0; k < kBank; ++k) bank[part][k] = bankMap[k] >= 0 ? mapRes.params[size_t(bankMap[k])].defV : 0;
+        for (auto& sl : slots) if (sl.param->paramID == "s_0600021e") tempoParam = sl.param;
         pending = std::make_unique<std::atomic<int>[]>(slots.size()); lastRecv = std::make_unique<std::atomic<int>[]>(slots.size()); incoming = std::make_unique<std::atomic<int>[]>(slots.size());
         for (size_t i = 0; i < slots.size(); ++i) { pending[i] = -1; lastRecv[i] = -1; incoming[i] = -1; slots[i].param->addListener(this); }
         startTimerHz(30);
@@ -59,6 +64,37 @@ public:
     juce::AudioParameterInt* deviceParam = nullptr;   // MODX M "MIDI device number" (1 to 16 shown, 0 to 15 on the wire)
 
     void sendAll() { for (size_t i = 0; i < slots.size(); ++i) pending[i] = slots[i].param->get(); }
+
+    // ---- per-part bank: mute, volume and pan of all 16 parts (the Home page part table). The device is the source of truth. ----
+    static constexpr int kBank = 3;
+    static constexpr const char* kBankIds[kBank] = { "s_1p000103", "s_1p000210", "s_1p000212" };
+    int bankMap[kBank] = { -1, -1, -1 };
+    std::atomic<int> bank[16][kBank];
+    int bankGet(int part, int k) const { return bank[part - 1][k].load(); }
+    void bankSet(int part, int k, int v)
+    {
+        const auto& p = mapRes.params[size_t(bankMap[k])]; v = juce::jlimit(p.minV, p.maxV, v);
+        bank[part - 1][k] = v; pushOut({ bankMap[k], part, v, false });
+    }
+    // read the current values from the device: every Home control and the part bank
+    void requestAll()
+    {
+        for (auto& s : slots)
+        {
+            const auto& p = mapRes.params[size_t(s.map)];
+            if (p.kind == ctl::Kind::Sysex) pushOut({ s.map, p.perPart ? partParam->get() : 1, 0, true });
+        }
+        for (int part = 1; part <= 16; ++part) for (int k = 0; k < kBank; ++k) pushOut({ bankMap[k], part, 0, true });
+    }
+    juce::AudioParameterInt* tempoParam = nullptr;
+    std::atomic<float> hostBpm{ 0.0f };
+    std::atomic<bool> tempoSync{ false };
+
+    struct Out { int map = 0, part = 1, value = 0; bool request = false; };
+    void pushOut(const Out& o)
+    {
+        const juce::ScopedLock sl(outLock); if (outQueue.size() < 4096) outQueue.push_back(o);
+    }
 
     void prepareToPlay(double, int) override { decoder.reset(); }
     void releaseResources() override {}
@@ -82,13 +118,22 @@ public:
                 // MODX M parameter changes move the matching parameter and are consumed; any other SysEx passes through
                 ctl::Bytes raw; raw.push_back(0xF0); raw.insert(raw.end(), msg.getSysExData(), msg.getSysExData() + msg.getSysExDataSize()); raw.push_back(0xF7);
                 const auto parsed = ctl::parse(raw);
-                if (auto e = ctl::decodeSysex(mapRes.params, parsed, partParam->get()))
-                { for (size_t i = 0; i < slots.size(); ++i) if (slots[i].map == e->paramIndex) { incoming[i] = e->value; break; } }
-                else passthru.addEvent(msg, meta.samplePosition);
+                const bool partAddr = parsed.type == ctl::SysexType::ParameterChange && parsed.addr[0] >= 0x10 && parsed.addr[0] <= 0x1F;
+                const int pp = partAddr ? parsed.addr[0] - 0x0F : partParam->get();
+                bool consumed = false;
+                if (auto e = ctl::decodeSysex(mapRes.params, parsed, pp))
+                {
+                    consumed = true;
+                    if (partAddr) for (int k = 0; k < kBank; ++k) if (e->paramIndex == bankMap[k]) bank[pp - 1][k] = e->value;
+                    if (!partAddr || pp == partParam->get())
+                        for (size_t i = 0; i < slots.size(); ++i) if (slots[i].map == e->paramIndex) { incoming[i] = e->value; break; }
+                }
+                if (!consumed) passthru.addEvent(msg, meta.samplePosition);
             }
             else passthru.addEvent(msg, meta.samplePosition);
         }
         midi.swapWith(passthru);
+        if (auto* ph = getPlayHead()) if (auto pos = ph->getPosition()) if (auto bpm = pos->getBpm()) hostBpm = float(*bpm);
         // 2. outgoing: changed parameters, a few per block
         const int ch = channelParam->get(); const int n = int(slots.size()); int sent = 0, pos = 0;
         for (int k = 0; k < n && sent < kPerBlock; ++k)
@@ -104,6 +149,15 @@ public:
                 for (const auto& m : ctl::encode(prm, ch, v))
                 { const juce::uint8 bytes[3] = { m.status, m.d1, m.d2 }; midi.addEvent(bytes, 3, juce::jmin(pos++, juce::jmax(0, audio.getNumSamples() - 1))); }
             ++sent; rotate = (i + 1) % n;
+        }
+        // per-part values and read requests queued by the editor
+        std::vector<Out> todo;
+        { const juce::ScopedTryLock sl(outLock); if (sl.isLocked()) { const size_t take = std::min<size_t>(outQueue.size(), size_t(kPerBlock)); todo.assign(outQueue.begin(), outQueue.begin() + long(take)); outQueue.erase(outQueue.begin(), outQueue.begin() + long(take)); } }
+        for (const auto& o : todo)
+        {
+            const auto& prm = mapRes.params[size_t(o.map)];
+            auto msg = o.request ? ctl::requestSysex(prm, deviceParam->get() - 1, o.part) : ctl::encodeSysex(prm, deviceParam->get() - 1, o.part, o.value);
+            if (msg) midi.addEvent(juce::MidiMessage::createSysExMessage(msg->data() + 1, int(msg->size()) - 2), juce::jmin(pos++, juce::jmax(0, audio.getNumSamples() - 1)));
         }
     }
 
@@ -122,7 +176,7 @@ public:
 
     void getStateInformation(juce::MemoryBlock& dest) override
     {
-        juce::XmlElement x("STATE"); x.setAttribute("v", 1); x.setAttribute("midi_channel", channelParam->get()); x.setAttribute("part", partParam->get()); x.setAttribute("device_number", deviceParam->get());
+        juce::XmlElement x("STATE"); x.setAttribute("v", 1); x.setAttribute("midi_channel", channelParam->get()); x.setAttribute("part", partParam->get()); x.setAttribute("device_number", deviceParam->get()); x.setAttribute("tempo_sync", tempoSync.load() ? 1 : 0);
         for (auto& s : slots) x.setAttribute(s.param->paramID, s.param->get());
         copyXmlToBinary(x, dest);
     }
@@ -132,7 +186,7 @@ public:
         {
             if (!x->hasTagName("STATE")) return;
             const int ch = x->getIntAttribute("midi_channel", 1); *channelParam = juce::jlimit(1, 16, ch);
-            *partParam = juce::jlimit(1, 16, x->getIntAttribute("part", 1)); *deviceParam = juce::jlimit(1, 16, x->getIntAttribute("device_number", 1));
+            *partParam = juce::jlimit(1, 16, x->getIntAttribute("part", 1)); *deviceParam = juce::jlimit(1, 16, x->getIntAttribute("device_number", 1)); tempoSync = x->getIntAttribute("tempo_sync", 0) != 0;
             for (auto& s : slots) if (x->hasAttribute(s.param->paramID)) setFromState(s, x->getIntAttribute(s.param->paramID));
         }
     }
@@ -148,6 +202,8 @@ private:
     void timerCallback() override
     {
         if (lastSeen.size() != slots.size()) { lastSeen.resize(slots.size()); for (size_t i = 0; i < slots.size(); ++i) lastSeen[i] = slots[i].param->get(); }
+        if (tempoSync.load() && tempoParam != nullptr && hostBpm.load() > 0.0f)
+        { const int t = juce::jlimit(tempoParam->getRange().getStart(), tempoParam->getRange().getEnd(), juce::roundToInt(hostBpm.load())); if (tempoParam->get() != t) *tempoParam = t; }
         // device to host: a parameter set from incoming MIDI is never sent back out
         for (size_t i = 0; i < slots.size(); ++i)
         {
@@ -164,6 +220,7 @@ private:
     }
 
     ctl::Decoder decoder;
+    juce::CriticalSection outLock; std::vector<Out> outQueue;
     std::unique_ptr<std::atomic<int>[]> pending, lastRecv, incoming;
     std::vector<int> lastSeen; int rotate = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CtlProcessor)
@@ -258,26 +315,59 @@ class ProcModel : public modx::HomeModel
 {
 public:
     explicit ProcModel(CtlProcessor& p) : proc(p) { for (size_t i = 0; i < p.slots.size(); ++i) byId[p.slots[i].param->paramID] = i; }
-    bool has(const juce::String& id) const override { return byId.count(id) > 0; }
-    float getNorm(const juce::String& id) const override { return par(id).getValue(); }
-    float defaultNorm(const juce::String& id) const override { return par(id).getDefaultValue(); }
+    // ids "p<part>:<id>" address the per-part bank (mute, volume, pan of one part); everything else is a normal parameter
+    struct PartId { int part = 0, k = -1; };
+    PartId partId(const juce::String& id) const
+    {
+        PartId r; if (!id.startsWithChar('p') || id.indexOfChar(':') < 0) return r;
+        const int part = id.substring(1, id.indexOfChar(':')).getIntValue(); const auto base = id.fromFirstOccurrenceOf(":", false, false);
+        for (int k = 0; k < CtlProcessor::kBank; ++k) if (base == CtlProcessor::kBankIds[k] && part >= 1 && part <= 16 && proc.bankMap[k] >= 0) { r.part = part; r.k = k; }
+        return r;
+    }
+    const ctl::Param& bankParam(int k) const { return proc.mapRes.params[size_t(proc.bankMap[k])]; }
+    bool has(const juce::String& id) const override { return byId.count(id) > 0 || partId(id).k >= 0; }
+    float getNorm(const juce::String& id) const override
+    {
+        if (auto pi = partId(id); pi.k >= 0) { const auto& p = bankParam(pi.k); return p.maxV > p.minV ? float(proc.bankGet(pi.part, pi.k) - p.minV) / float(p.maxV - p.minV) : 0.0f; }
+        return par(id).getValue();
+    }
+    float defaultNorm(const juce::String& id) const override
+    {
+        if (auto pi = partId(id); pi.k >= 0) { const auto& p = bankParam(pi.k); return p.maxV > p.minV ? float(p.defV - p.minV) / float(p.maxV - p.minV) : 0.0f; }
+        return par(id).getDefaultValue();
+    }
     juce::String valueText(const juce::String& id, float norm) const override
     {
-        const int v = par(id).convertFrom0to1(norm);
-        if (id == "s_06000208") return v == 64 ? juce::String("C") : v < 64 ? "L" + juce::String(64 - v) : "R" + juce::String(v - 64);   // Performance Pan: 64 is centre
+        int v;
+        if (auto pi = partId(id); pi.k >= 0) { const auto& p = bankParam(pi.k); v = p.minV + juce::roundToInt(norm * float(p.maxV - p.minV)); }
+        else v = par(id).convertFrom0to1(norm);
+        if (id == "s_06000208" || id.endsWith(":s_1p000212")) return v == 64 ? juce::String("C") : v < 64 ? "L" + juce::String(64 - v) : "R" + juce::String(v - 64);   // pan: 64 is centre
         return juce::String(v);
     }
     juce::String describe(const juce::String& id) const override
     {
-        const auto& s = proc.slots[byId.at(id)]; const auto& m = proc.mapRes.params[size_t(s.map)]; const auto r = s.param->getRange();
         auto hex = [](int v) { return juce::String::toHexString(v).paddedLeft('0', 2).toUpperCase(); };
+        if (auto pi = partId(id); pi.k >= 0)
+        {
+            const auto& m = bankParam(pi.k);
+            return juce::String(m.name) + ", part " + juce::String(pi.part) + "\nRange " + juce::String(m.minV) + " to " + juce::String(m.maxV) + ", now " + juce::String(proc.bankGet(pi.part, pi.k)) + "\nSysEx " + hex(0x10 + pi.part - 1) + " " + hex(m.sysAddr[1]) + " " + hex(m.sysAddr[2]) + " " + hex(m.sysAddr[3]) + (m.hwVerified ? "" : ", not tested on the device yet");
+        }
+        const auto& s = proc.slots[byId.at(id)]; const auto& m = proc.mapRes.params[size_t(s.map)]; const auto r = s.param->getRange();
         juce::String a = m.kind == ctl::Kind::CC ? "CC " + juce::String(m.a) : m.kind == ctl::Kind::NRPN ? "NRPN " + juce::String(m.a) + ":" + juce::String(m.b)
-            : "SysEx " + hex(m.sysAddr[0]) + " " + hex(m.sysAddr[1]) + " " + hex(m.sysAddr[2]) + " " + hex(m.sysAddr[3]) + (m.perPart ? " (selected part)" : "");
+            : "SysEx " + hex(m.sysAddr[0]) + " " + hex(m.sysAddr[1]) + " " + hex(m.sysAddr[2]) + " " + hex(m.sysAddr[3]) + (m.perPart ? " (part " + juce::String(proc.partParam->get()) + ")" : juce::String());
         return juce::String(m.name) + "\nRange " + juce::String(r.getStart()) + " to " + juce::String(r.getEnd()) + ", now " + juce::String(s.param->get()) + "\n" + a + (m.hwVerified ? "" : ", not tested on the device yet");
     }
-    void beginEdit(const juce::String& id) override { par(id).beginChangeGesture(); }
-    void setNorm(const juce::String& id, float n) override { par(id).setValueNotifyingHost(n); }
-    void endEdit(const juce::String& id) override { par(id).endChangeGesture(); }
+    int tempoValue() const override { return proc.tempoParam != nullptr ? proc.tempoParam->get() : 128; }
+    float hostBpm() const override { return proc.hostBpm.load(); }
+    bool tempoSync() const override { return proc.tempoSync.load(); }
+    void setTempoSync(bool b) override { proc.tempoSync = b; }
+    void beginEdit(const juce::String& id) override { if (partId(id).k < 0) par(id).beginChangeGesture(); }
+    void setNorm(const juce::String& id, float n) override
+    {
+        if (auto pi = partId(id); pi.k >= 0) { const auto& p = bankParam(pi.k); proc.bankSet(pi.part, pi.k, p.minV + juce::roundToInt(juce::jlimit(0.0f, 1.0f, n) * float(p.maxV - p.minV))); return; }
+        par(id).setValueNotifyingHost(n);
+    }
+    void endEdit(const juce::String& id) override { if (partId(id).k < 0) par(id).endChangeGesture(); }
 private:
     juce::RangedAudioParameter& par(const juce::String& id) const { return *static_cast<juce::RangedAudioParameter*>(proc.slots[byId.at(id)].param); }
     CtlProcessor& proc; std::map<juce::String, size_t> byId;
@@ -317,11 +407,11 @@ private:
         juce::PopupMenu m, ch, dv, pt;
         for (int i = 1; i <= 16; ++i) { ch.addItem(100 + i, juce::String(i), true, proc.channelParam->get() == i); dv.addItem(200 + i, juce::String(i), true, proc.deviceParam->get() == i); pt.addItem(300 + i, juce::String(i), true, proc.partParam->get() == i); }
         m.addSubMenu("MIDI channel (CC controls)", ch); m.addSubMenu("Device number (SysEx), must match the MODX M", dv); m.addSubMenu("Part for part controls", pt);
-        m.addSeparator(); m.addItem(1, "Send all values to the device now"); m.addItem(2, "Info bubbles", true, page.bubblesOn); m.addItem(3, "Developer parameter list...");
+        m.addSeparator(); m.addItem(1, "Send all values to the device now"); m.addItem(4, "Read all values from the device now"); m.addItem(5, "Send the DAW tempo to the MODX M", true, proc.tempoSync.load()); m.addItem(2, "Info bubbles", true, page.bubblesOn); m.addItem(3, "Developer parameter list...");
         m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&page).withMinimumWidth(260), [this](int r)
         {
             if (r >= 101 && r <= 116) *proc.channelParam = r - 100; else if (r >= 201 && r <= 216) *proc.deviceParam = r - 200; else if (r >= 301 && r <= 316) *proc.partParam = r - 300;
-            else if (r == 1) proc.sendAll(); else if (r == 2) { page.bubblesOn = !page.bubblesOn; page.repaint(); }
+            else if (r == 1) proc.sendAll(); else if (r == 4) proc.requestAll(); else if (r == 5) proc.tempoSync = !proc.tempoSync.load(); else if (r == 2) { page.bubblesOn = !page.bubblesOn; page.repaint(); }
             else if (r == 3)
             {
                 juce::DialogWindow::LaunchOptions lo; lo.dialogTitle = "MODX M Controller: parameter list"; lo.content.setOwned(new DevListEditor(proc));

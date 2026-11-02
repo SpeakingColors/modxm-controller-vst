@@ -381,6 +381,31 @@ inline constexpr uint32_t sceneSelBg = 0xFF2F7FE0u, sceneOffBg = 0xFF22252Au, sc
 
 inline constexpr float partRowY[] = { 139.0f, 163.0f, 187.0f, 211.0f, 235.0f, 259.0f, 283.0f, 307.0f };   // top of each part row (Mute text y)
 inline constexpr float reset100X = 1396.4f, reset100Y = 11.0f, reset100W = 58.0f, reset100H = 24.0f;
+struct Row { int num, badgeText, badgeRect, muteText, muteRect, soloText, catText, nameText, panText, bar; };
+inline constexpr Row rows[] = {
+  { 49, 50, 24, 51, 25, 52, 53, 54, 55, 1 },
+  { 56, 57, 27, 58, 28, 59, 60, 61, 62, 2 },
+  { 63, 64, 30, 65, 31, 66, 67, 68, 69, 3 },
+  { 70, 71, 33, 72, 34, 73, 74, 75, 76, 4 },
+  { 77, 78, 36, 79, 37, 80, 81, 82, 83, 5 },
+  { 84, 85, 39, 86, 40, 87, 88, 89, 90, 6 },
+  { 91, 92, 42, 93, 43, 94, 95, 96, 97, 7 },
+  { 98, 99, 45, 100, 46, 101, 102, 103, 104, 8 }
+};
+inline constexpr int tabRect[3] = { 21, 22, 23 };
+inline constexpr int tabText[3] = { 41, 42, 43 };
+inline constexpr uint32_t tabSelBg = 0xFF3FC07Au, tabOffBg = 0xFF22252Au, tabSelTx = 0xFF071014u, tabOffTx = 0xFF8E949Du;
+struct Switch { int track, thumb; const char* paramId; const char* tip; float offX, onX; uint32_t onBg, offBg; };
+inline constexpr Switch switches[] = {
+  { 54, 55, "s_06000105", "Reverb Switch", 937.0f, 954.0f, 0xFF2F7FE0u, 0xFF33373Eu },
+  { 59, 60, "s_06000106", "Variation Switch", 1131.3f, 1148.3f, 0xFF2F7FE0u, 0xFF33373Eu },
+  { 64, 65, "s_06000108", "Master Effect Switch (MFX)", 1325.7f, 1342.7f, 0xFF2F7FE0u, 0xFF33373Eu },
+  { 73, 74, "s_06000106", "Variation Switch", 213.9f, 230.9f, 0xFF2F7FE0u, 0xFF33373Eu },
+  { 77, 78, "s_06000105", "Reverb Switch", 215.1f, 232.1f, 0xFF2F7FE0u, 0xFF33373Eu },
+  { 81, 82, "s_06000108", "Master Effect Switch (MFX)", 608.5f, 625.5f, 0xFF2F7FE0u, 0xFF33373Eu },
+  { 85, 86, "s_06000107", "Master EQ Switch", 841.6f, 858.6f, 0xFF2F7FE0u, 0xFF33373Eu }
+};
+inline constexpr int tempoText = 4, perfNameText = 1, dawText = 3;
 
 inline constexpr Op ops[] = {
   { 0, 0 },

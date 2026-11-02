@@ -57,6 +57,15 @@ inline std::optional<Bytes> encodeSysex(const Param& p, int dev, int part, int v
     return parameterChange(dev, a, d);
 }
 
+// Asks the synth to send the current value of one parameter (answered with a parameter change).
+inline std::optional<Bytes> requestSysex(const Param& p, int dev, int part)
+{
+    if (p.kind != Kind::Sysex) return std::nullopt;
+    Addr a{ uint8_t(p.sysAddr[0]), uint8_t(p.sysAddr[1]), uint8_t(p.sysAddr[2]), uint8_t(p.sysAddr[3]) };
+    if (p.perPart) a[0] = uint8_t(0x10 | (std::clamp(part, 1, 16) - 1));
+    return parameterRequest(dev, a);
+}
+
 // Finds the parameter an incoming parameter change belongs to. Part addresses only match the selected part.
 inline std::optional<Event> decodeSysex(const std::vector<Param>& map, const Parsed& m, int part)
 {

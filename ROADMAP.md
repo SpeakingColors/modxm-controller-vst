@@ -23,3 +23,10 @@ Controller for the Yamaha MODX M6, close to Yamaha ESP. MODX2_* is the current d
 ## Every cat plugin
 - Draw through `catui::RenderGate` so meters and animations stop when the window is not in front (audio, automation and MIDI keep running)
 - Settings page with MIDI filters on by default, selectable preset/backup folders, UI size reset to 100%
+
+## Wired on the Home page (2026-11-02, untested on real hardware)
+- Part table: mute, volume, pan of parts 1-16 (pages 1-8 / 9-16), read back from the device
+- Header switches (Rev, Var, MFX, Master EQ), tempo (optional DAW tempo sync), all knobs, scenes
+- Gear menu: Read all values from the device, Send all values, Send the DAW tempo
+- Not wired yet: part names and engine badges (need bulk dump parsing), Solo, effect type and preset lists, Master EQ graph, Assign 8, Audio tab
+- To add to the mockup so it stays in sync: mute-on style, blank part rows

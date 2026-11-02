@@ -165,6 +165,50 @@ o.append('inline constexpr float partRowY[] = { %s };   // top of each part row 
 for key in ('⤡ 100%',):
     t = next(t for t in d['texts'] if key in t['s'])
     o.append('inline constexpr float reset100X = %.1ff, reset100Y = 11.0f, reset100W = 58.0f, reset100H = 24.0f;\n' % (t['x'] - 14))
+# ---- part table rows, tabs, switches, dynamic texts ----
+def tidx(pred): return next(i for i, t in enumerate(d['texts']) if pred(t))
+def ridx(pred): return next(i for i, r in enumerate(d['rects']) if pred(r))
+rows_out = []
+row_bars = [i for i, b in enumerate(d['bars']) if b['w'] == 70]
+for n, ry in enumerate([r['y'] for r in d['texts'] if r['s'] == 'Mute']):
+    def at(x, y=ry, tol=2.5): return tidx(lambda t: abs(t['x'] - x) < 3 and abs(t['y'] - y) < tol or False)
+    num = tidx(lambda t: t['s'] == str(n + 1) and abs(t['x'] - 86) < 2)
+    badge = tidx(lambda t: abs(t['x'] - 116) < 14 and abs(t['y'] - (ry - 0.5 + 0.0)) < 3 and t['s'] in ('AWM2', 'AN-X', 'FM-X'))
+    mute = tidx(lambda t: t['s'] == 'Mute' and abs(t['y'] - ry) < 1)
+    solo = tidx(lambda t: t['s'] == 'Solo' and abs(t['y'] - ry) < 1)
+    cat = tidx(lambda t: abs(t['x'] - 232) < 3 and abs(t['y'] - ry) < 3)
+    name = tidx(lambda t: abs(t['x'] - 272) < 3 and abs(t['y'] - (ry - 1)) < 3)
+    pan = tidx(lambda t: abs(t['x'] - 378) < 3 and abs(t['y'] - ry) < 3)
+    def rect_around(ti):
+        tx = d['texts'][ti]; cx, cy = tx['x'] + tx['w'] / 2, tx['y'] + tx['h'] / 2; best = None
+        for i, r in enumerate(d['rects']):
+            if r['x'] <= cx <= r['x'] + r['w'] and r['y'] <= cy <= r['y'] + r['h'] and r['w'] < 60 and r['h'] < 30:
+                if best is None or r['w'] * r['h'] < d['rects'][best]['w'] * d['rects'][best]['h']: best = i
+        return best
+    rows_out.append((num, badge, rect_around(badge), mute, rect_around(mute), solo, cat, name, pan, row_bars[n]))
+o.append('struct Row { int num, badgeText, badgeRect, muteText, muteRect, soloText, catText, nameText, panText, bar; };\n')
+o.append('inline constexpr Row rows[] = {\n' + ',\n'.join('  { %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }' % (a, b, c, e, f, h, i, j, k, l) for a, b, c, e, f, h, i, j, k, l in rows_out) + '\n};\n')
+tabs = []
+for nm in ('1-8', '9-16', 'Audio'):
+    t = tidx(lambda t, nm=nm: t['s'] == nm and abs(t['y'] - 104.5) < 1); r_ = None
+    tx = d['texts'][t]; cx, cy = tx['x'] + tx['w'] / 2, tx['y'] + tx['h'] / 2
+    r_ = ridx(lambda r: r['x'] <= cx <= r['x'] + r['w'] and r['y'] <= cy <= r['y'] + r['h'] and r['h'] == 20 and r['w'] < 60)
+    tabs.append((r_, t))
+o.append('inline constexpr int tabRect[3] = { %s };\ninline constexpr int tabText[3] = { %s };\n' % (', '.join(str(a) for a, b in tabs), ', '.join(str(b) for a, b in tabs)))
+o.append('inline constexpr uint32_t tabSelBg = 0x%08Xu, tabOffBg = 0x%08Xu, tabSelTx = 0x%08Xu, tabOffTx = 0x%08Xu;\n' % (col(d['rects'][tabs[0][0]]['bg']), col(d['rects'][tabs[1][0]]['bg']), col(d['texts'][tabs[0][1]]['c']), col(d['texts'][tabs[1][1]]['c'])))
+# effect switches: 30x15 track followed by 11x11 thumb
+SW = {(935, 108): ('s_06000105', 'Reverb Switch'), (1129, 108): ('s_06000106', 'Variation Switch'), (1324, 108): ('s_06000108', 'Master Effect Switch (MFX)'),
+      (212, 545): ('s_06000106', 'Variation Switch'), (213, 581): ('s_06000105', 'Reverb Switch'), (607, 563): ('s_06000108', 'Master Effect Switch (MFX)'), (840, 563): ('s_06000107', 'Master EQ Switch')}
+sw = []
+for i, r in enumerate(d['rects']):
+    if r['w'] == 30 and r['h'] == 15:
+        key = next((k for k in SW if abs(k[0] - r['x']) < 1.5 and abs(k[1] - r['y']) < 1.5), None)
+        if key: sw.append((i, i + 1, SW[key]))
+o.append('struct Switch { int track, thumb; const char* paramId; const char* tip; float offX, onX; uint32_t onBg, offBg; };\n')
+tr = d['rects'][sw[0][0]]; trOff = next(d['rects'][a] for a, b, c in sw if d['rects'][a]['bg'][:3] == [51, 55, 62])
+o.append('inline constexpr Switch switches[] = {\n' + ',\n'.join('  { %d, %d, %s, %s, %.1ff, %.1ff, 0x%08Xu, 0x%08Xu }' % (a, b, cstr(c[0]), cstr(c[1]), d['rects'][a]['x'] + 2, d['rects'][a]['x'] + 19, col([47, 127, 224, 1]), col([51, 55, 62, 1])) for a, b, c in sw) + '\n};\n')
+o.append('inline constexpr int tempoText = %d, perfNameText = %d, dawText = %d;\n' % (tidx(lambda t: t['s'].startswith('♩')), tidx(lambda t: t['s'] == 'ArquadraX'), tidx(lambda t: t['s'] == 'DAW')))
+
 o.append('\ninline constexpr Op ops[] = {\n')
 kinds = {'rect': 0, 'text': 1, 'svg': 2, 'knob': 3, 'bar': 4}
 ops_out = []

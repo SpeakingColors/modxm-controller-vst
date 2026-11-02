@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     m = encodeSysex(r.params[3], 0, 1, 300); CHECK(m && (*m)[10] == 0x02 && (*m)[11] == 0x2C);
     m = encodeSysex(r.params[3], 0, 1, 999); CHECK(m && (*m)[10] == 0x02 && (*m)[11] == 0x2C);       // clamped
     // part address: part 3 -> first byte 0x12
+    { auto q = requestSysex(r.params[2], 5, 3); CHECK(q && (*q)[2] == 0x35 && (*q)[6] == 0x12 && q->size() == 11 && q->back() == 0xF7); }   // request: 3n, part 3 address
     m = encodeSysex(r.params[2], 5, 3, 1); CHECK(m && (*m)[2] == 0x15 && (*m)[6] == 0x12 && (*m)[10] == 0x01);
     // round trip through the parser and decoder
     for (size_t i = 0; i < r.params.size(); ++i)

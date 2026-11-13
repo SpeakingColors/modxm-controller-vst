@@ -28,5 +28,7 @@ Controller for the Yamaha MODX M6, close to Yamaha ESP. MODX2_* is the current d
 - Part table: mute, volume, pan of parts 1-16 (pages 1-8 / 9-16), read back from the device
 - Header switches (Rev, Var, MFX, Master EQ), tempo (optional DAW tempo sync), all knobs, scenes
 - Gear menu: Read all values from the device, Send all values, Send the DAW tempo
-- Not wired yet: part names and engine badges (need bulk dump parsing), Solo, effect type and preset lists, Master EQ graph, Assign 8, Audio tab
+- Master EQ graph (v0.2.1): 5 bands, +-12 dB, drag a dot for gain and frequency, double click resets, wheel changes gain. Frequency steps use about 6 per octave (32 Hz to 16 kHz), taken from the Data List ranges; the curve is a drawn estimate, not the device's exact response
+- Live value bubble while dragging any knob, bar or EQ dot
+- Not wired yet: part names and engine badges (need bulk dump parsing), Solo and Assign 8 (no parameter in the Data List), effect type and preset lists, Audio tab
 - To add to the mockup so it stays in sync: mute-on style, blank part rows

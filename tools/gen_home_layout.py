@@ -34,7 +34,7 @@ BIND_KNOB = {
  (513, 182): ('s_0600021a', 'Cutoff Frequency'), (559, 182): ('s_0600021c', 'Resonance'), (609, 182): ('s_06000218', 'FEG Depth'),
  (710, 216): ('s_0600020a', 'AEG Attack Time'), (756, 216): ('s_0600020c', 'AEG Decay Time'), (802, 216): ('s_0600020e', 'AEG Sustain Level'), (848, 216): ('s_06000210', 'AEG Release Time'),
  (944, 222): ('s_06000232', 'Reverb Return'), (1006, 222): ('s_0600023c', 'Send Variation To Reverb'), (1068, 222): ('s_06000238', 'Variation Return'),
- (517, 545): ('s_06000238', 'Variation Return'), (517, 585): ('s_06000232', 'Reverb Return'),
+ (588, 538): ('s_06000238', 'Variation Return'), (588, 580): ('s_06000232', 'Reverb Return'),
 }
 BIND_BAR = {(219, 71): ('s_06000206', 'Performance Volume')}
 # text start -> (param, on style, off style)

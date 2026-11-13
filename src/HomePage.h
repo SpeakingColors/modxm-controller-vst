@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <cstring>
+#include <cmath>
 #include "HomeLayout.h"
 #include "catui/CatLookAndFeel.h"
 
@@ -43,6 +44,7 @@ public:
             if (auto xml = juce::XmlDocument::parse(s.svg)) d = juce::Drawable::createFromSVG(*xml);
             drawables.push_back(std::move(d));
         }
+        for (size_t i = 0; i < std::size(home::svgs); ++i) if (std::strstr(home::svgs[i].svg, "over live output curve")) eqSvg = int(i);
         for (size_t i = 0; i < std::size(home::knobs); ++i) lastKnob.push_back(-1.0f);
         for (size_t i = 0; i < std::size(home::bars); ++i) lastBar.push_back(-1.0f);
         setMouseCursor(juce::MouseCursor::NormalCursor);
@@ -116,6 +118,12 @@ public:
                 const auto id = juce::String("s_0600022a");
                 if (model.has(id)) { model.beginEdit(id); model.setNorm(id, float(h->index) / 7.0f); model.endEdit(id); repaint(); }
             }
+            else if (h->type == EqDot)
+            {
+                eqBandDrag = h->index; drag = *h; dragging = true; eqFreqId = eqBands[h->index].freqId;
+                model.beginEdit(eqBands[h->index].gainId); model.beginEdit(eqBands[h->index].freqId);
+                eqSet(h->index, toVirtual(e.position)); bubble = eqBubble(h->index); bubblePos = e.position; repaint();
+            }
             else if (h->type == Reset) { if (onReset100) onReset100(); }
             else if (h->type == Info) { if (onInfo) onInfo(); }
             else if (h->type == Gear) { if (onGear) onGear(); }
@@ -125,6 +133,7 @@ public:
     void mouseDrag(const juce::MouseEvent& e) override
     {
         if (!dragging) return;
+        if (drag.type == EqDot) { eqSet(eqBandDrag, toVirtual(e.position)); bubble = eqBubble(eqBandDrag); bubblePos = e.position; repaint(); return; }
         float n;
         if (drag.type == Bar || drag.type == RowBar)
         {
@@ -140,13 +149,18 @@ public:
         bubble = drag.tip.upToFirstOccurrenceOf(":", false, false) + "\n" + model.describe(drag.id); bubblePos = e.position; repaint();   // live value while dragging
     }
 
-    void mouseUp(const juce::MouseEvent&) override { if (dragging) { model.endEdit(drag.id); dragging = false; if (!bubblesOn) bubble = {}; repaint(); } }
+    void mouseUp(const juce::MouseEvent&) override { if (dragging && drag.type == EqDot) { model.endEdit(eqBands[eqBandDrag].gainId); model.endEdit(eqBands[eqBandDrag].freqId); eqBandDrag = -1; dragging = false; if (!bubblesOn) bubble = {}; repaint(); return; } if (dragging) { model.endEdit(drag.id); dragging = false; if (!bubblesOn) bubble = {}; repaint(); } }
 
     void mouseDoubleClick(const juce::MouseEvent& e) override
     {
         const auto p = toVirtual(e.position);
         if (auto h = hitTest(p))
         {
+            if (h->type == EqDot)
+            {
+                for (auto* id : { eqBands[h->index].gainId, eqBands[h->index].freqId }) if (model.has(id)) { model.beginEdit(id); model.setNorm(id, model.defaultNorm(id)); model.endEdit(id); }
+                repaint(); return;
+            }
             const auto id = h->type == RowBar ? rowId(h->index, 1) : h->type == Tempo ? juce::String("s_0600021e") : h->id;
             if ((h->type == Knob || h->type == Bar || h->type == RowBar || h->type == Tempo) && id.isNotEmpty() && model.has(id))
             { model.beginEdit(id); model.setNorm(id, model.defaultNorm(id)); model.endEdit(id); repaint(); }
@@ -161,6 +175,12 @@ public:
     {
         if (auto h = hitTest(toVirtual(e.position)))
         {
+            if (h->type == EqDot)
+            {
+                const auto gid = juce::String(eqBands[h->index].gainId);
+                if (model.has(gid)) { model.beginEdit(gid); model.setNorm(gid, juce::jlimit(0.0f, 1.0f, model.getNorm(gid) + (w.deltaY > 0 ? 1.0f : -1.0f) / 24.0f)); model.endEdit(gid); repaint(); }
+                return;
+            }
             const auto wid = h->type == RowBar ? rowId(h->index, 1) : h->type == Tempo ? juce::String("s_0600021e") : h->id;
             if ((h->type == Knob || h->type == Bar || h->type == RowBar || h->type == Tempo) && wid.isNotEmpty() && model.has(wid))
             {
@@ -171,7 +191,7 @@ public:
     }
 
 private:
-    enum Type { Knob, Bar, Toggle, Scene, Reset, Info, Gear, RowMute, RowBar, Tab, Switch, Tempo, Daw };
+    enum Type { Knob, Bar, Toggle, Scene, Reset, Info, Gear, RowMute, RowBar, Tab, Switch, Tempo, Daw, EqDot };
     struct Hit { Type type; int index; juce::Rectangle<float> r; juce::String id, tip; };
     static constexpr const char* bankIds[3] = { "s_1p000103", "s_1p000210", "s_1p000212" };   // mute, volume, pan of a part
     juce::String rowId(int row, int k) const { return "p" + juce::String(row + 1 + 8 * partPage) + ":" + bankIds[k]; }
@@ -181,6 +201,70 @@ private:
     std::vector<float> lastKnob, lastBar;
     juce::String bubble; juce::Point<float> bubblePos;
     Hit drag; float dragStartNorm = 0.0f; bool dragging = false;
+
+    // ---- Master EQ graph (5 bands, +-12 dB, Data List 06 00 0A 00 to 20), drawn and dragged natively ----
+    struct EqBand { const char* gainId; const char* freqId; int fMin, fMax; bool shelf; const char* name; uint32_t col; };
+    static constexpr EqBand eqBands[5] = {
+        { "s_06000a00", "s_06000a02", 4, 40, true, "Low", 0xff2ecbd5 }, { "s_06000a08", "s_06000a0a", 14, 54, false, "Lo-Mid", 0xffe9c46a },
+        { "s_06000a0e", "s_06000a10", 14, 54, false, "Mid", 0xfff27fc0 }, { "s_06000a14", "s_06000a16", 14, 54, false, "Hi-Mid", 0xff3fc07a },
+        { "s_06000a1a", "s_06000a1c", 28, 58, true, "High", 0xff9b8cff } };
+    int eqSvg = -1; int eqBandDrag = -1; juce::String eqFreqId;
+    static float eqHz(int idx) { return 32.0f * std::pow(2.0f, float(idx - 4) / 6.0f); }   // about 6 steps per octave; matches the 32 Hz to 16 kHz span in the Data List
+    float eqGainDb(int b) const { return model.has(eqBands[b].gainId) ? model.getNorm(eqBands[b].gainId) * 24.0f - 12.0f : 0.0f; }
+    int eqIdx(int b) const
+    {
+        const auto& e = eqBands[b]; const int def = b == 0 ? 12 : b == 1 ? 20 : b == 2 ? 28 : b == 3 ? 44 : 52;
+        return model.has(e.freqId) ? e.fMin + juce::roundToInt(model.getNorm(e.freqId) * float(e.fMax - e.fMin)) : def;
+    }
+    static constexpr float kEqLeft = 83.25f;
+    float eqX(float hz) const { const auto& s = home::svgs[size_t(eqSvg)]; return s.x + kEqLeft + std::log10(hz / 20.0f) / 3.0f * (s.w - kEqLeft); }
+    float eqY(float db) const { const auto& s = home::svgs[size_t(eqSvg)]; return s.y + 55.0f - db / 12.0f * 45.0f; }
+    float eqResp(float hz) const
+    {
+        float g = 0.0f; const float x = std::log(hz);
+        for (int b = 0; b < 5; ++b)
+        {
+            const float d = x - std::log(eqHz(eqIdx(b))), gb = eqGainDb(b);
+            if (!eqBands[b].shelf) g += gb * std::exp(-d * d / (2.0f * 0.55f * 0.55f));
+            else if (b == 0) g += gb / (1.0f + std::exp(d * 2.2f));
+            else g += gb / (1.0f + std::exp(-d * 2.2f));
+        }
+        return g;
+    }
+    static juce::String eqFmtHz(float hz) { return hz >= 1000.0f ? juce::String(hz / 1000.0f, hz >= 10000.0f ? 1 : 2) + " kHz" : juce::String(juce::roundToInt(hz)) + " Hz"; }
+    static juce::String eqFmtDb(float db) { return juce::String(db > 0 ? "+" : "") + juce::String(juce::roundToInt(db)) + " dB"; }
+    juce::String eqBubble(int b) const { return juce::String("Master EQ ") + eqBands[b].name + "\n" + eqFmtDb(eqGainDb(b)) + ", " + eqFmtHz(eqHz(eqIdx(b))); }
+    void eqSet(int b, juce::Point<float> p)
+    {
+        const auto& s = home::svgs[size_t(eqSvg)]; const auto& e = eqBands[b];
+        const float u = juce::jlimit(0.0f, 1.0f, (p.x - (s.x + kEqLeft)) / (s.w - kEqLeft)); const float hz = 20.0f * std::pow(1000.0f, u);
+        const int idx = juce::jlimit(e.fMin, e.fMax, juce::roundToInt(4.0f + 6.0f * std::log2(hz / 32.0f)));
+        const int db = juce::jlimit(-12, 12, juce::roundToInt((s.y + 55.0f - p.y) / 45.0f * 12.0f));
+        if (model.has(e.freqId)) model.setNorm(e.freqId, float(idx - e.fMin) / float(e.fMax - e.fMin));
+        if (model.has(e.gainId)) model.setNorm(e.gainId, float(db + 12) / 24.0f);
+    }
+    void paintEq(juce::Graphics& g) const
+    {
+        const auto& s = home::svgs[size_t(eqSvg)];
+        g.setColour(juce::Colour(0xff0f1113)); g.fillRect(s.x, s.y, s.w, 100.0f);
+        for (int i = 0; i < 5; ++i) { g.setColour(juce::Colour(i == 2 ? 0xff30353c : 0xff262a30)); g.fillRect(s.x + kEqLeft, s.y + 10.0f + 22.5f * float(i) - 0.5f, s.w - kEqLeft, 1.0f); }
+        g.saveState(); g.reduceClipRegion(juce::Rectangle<float>(s.x + kEqLeft, s.y + 4.0f, s.w - kEqLeft, 100.0f).toNearestInt());
+        juce::Path c;
+        for (int i = 0; i <= 240; ++i)
+        {
+            const float hz = 20.0f * std::pow(1000.0f, float(i) / 240.0f); const float x = eqX(hz), y = eqY(juce::jlimit(-12.0f, 12.0f, eqResp(hz)));
+            if (i) c.lineTo(x, y); else c.startNewSubPath(x, y);
+        }
+        g.setColour(juce::Colour(0xff2ecbd5)); g.strokePath(c, juce::PathStrokeType(2.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        g.restoreState();
+        for (int b = 0; b < 5; ++b)
+        {
+            const float x = eqX(eqHz(eqIdx(b))), y = eqY(eqGainDb(b));
+            g.setColour(juce::Colour(eqBands[b].col)); g.fillEllipse(x - 5.0f, y - 5.0f, 10.0f, 10.0f);
+            if (eqBandDrag == b) { g.setColour(juce::Colours::white); g.drawEllipse(x - 7.0f, y - 7.0f, 14.0f, 14.0f, 1.5f); }
+        }
+    }
+
 
     static std::array<juce::Typeface::Ptr, 3>& fonts() { static std::array<juce::Typeface::Ptr, 3> f; return f; }
     float scaleNow() const { return float(getWidth()) / float(kTotalW); }
@@ -198,6 +282,11 @@ private:
     //==============================================================================
     std::optional<Hit> hitTest(juce::Point<float> p) const
     {
+        if (eqSvg >= 0) for (int b = 4; b >= 0; --b)
+        {
+            const float x = eqX(eqHz(eqIdx(b))), y = eqY(eqGainDb(b));
+            if (juce::Rectangle<float>(x - 9.0f, y - 9.0f, 18.0f, 18.0f).contains(p)) return Hit{ EqDot, b, {}, eqBands[b].gainId, juce::String("Master EQ ") + eqBands[b].name + ": drag for gain and frequency, double click to reset" };
+        }
         for (const auto& h : hits()) if (h.r.contains(p)) return h;
         return std::nullopt;
     }
@@ -315,6 +404,8 @@ private:
             else if (rw.muteText == i && isOn(rowId(n, 0))) c = juce::Colour(0xfff4f5f7);
         }
         for (int s = 0; s < 3; ++s) if (home::tabText[s] == i) c = juce::Colour(s == partPage ? home::tabSelTx : home::tabOffTx);
+        if (t.y > 419.0f && t.y < 421.0f && t.x < 700.0f)
+            for (int b = 0; b < 5; ++b) if (juce::String(t.s).startsWith(juce::String(eqBands[b].name) + " ")) { const int d = juce::roundToInt(eqGainDb(b)); str = juce::String(eqBands[b].name) + " " + (d > 0 ? "+" : "") + juce::String(d); }
         if (i == home::perfNameText) str = "Performance";
         if (i == home::dawText && model.tempoSync()) c = juce::Colour(0xff2ecbd5);
         if (i == home::tempoText && model.has("s_0600021e"))
@@ -325,6 +416,7 @@ private:
 
     void paintSvg(juce::Graphics& g, int i) const
     {
+        if (i == eqSvg) { paintEq(g); return; }
         if (auto* d = drawables[size_t(i)].get()) d->drawWithin(g, { home::svgs[i].x, home::svgs[i].y, home::svgs[i].w, home::svgs[i].h }, juce::RectanglePlacement::stretchToFit, 1.0f);
     }
 
@@ -377,6 +469,7 @@ private:
         for (const auto& b : home::bars) if (b.paramId && model.has(b.paramId)) mix(model.getNorm(b.paramId));
         for (const auto& t : home::toggles) if (model.has(t.paramId)) mix(model.getNorm(t.paramId));
         for (const auto& s : home::switches) if (model.has(s.paramId)) mix(model.getNorm(s.paramId));
+        for (const auto& e : eqBands) { if (model.has(e.gainId)) mix(model.getNorm(e.gainId)); if (model.has(e.freqId)) mix(model.getNorm(e.freqId)); }
         for (int r = 0; r < 8; ++r) for (int k = 0; k < 3; ++k) if (model.has(rowId(r, k))) mix(model.getNorm(rowId(r, k)));
         mix(float(model.tempoValue())); mix(model.hostBpm()); mix(model.tempoSync() ? 1.0f : 0.0f); mix(float(partPage)); mix(model.has("s_0600022a") ? model.getNorm("s_0600022a") : 0.0f);
         if (h != lastHash) { lastHash = h; repaint(); }

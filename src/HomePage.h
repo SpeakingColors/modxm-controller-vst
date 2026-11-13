@@ -79,7 +79,7 @@ public:
             }
         }
         g.restoreState();
-        if (bubblesOn && bubble.isNotEmpty()) paintBubble(g);
+        if ((bubblesOn || dragging) && bubble.isNotEmpty()) paintBubble(g);
     }
 
     void resized() override { repaint(); }
@@ -136,10 +136,11 @@ public:
             const float range = e.mods.isShiftDown() ? 800.0f : 160.0f;   // pixels for the full range; Shift = fine
             n = juce::jlimit(0.0f, 1.0f, dragStartNorm - float(e.getDistanceFromDragStartY()) / range);
         }
-        model.setNorm(drag.id, n); repaint();
+        model.setNorm(drag.id, n);
+        bubble = drag.tip.upToFirstOccurrenceOf(":", false, false) + "\n" + model.describe(drag.id); bubblePos = e.position; repaint();   // live value while dragging
     }
 
-    void mouseUp(const juce::MouseEvent&) override { if (dragging) { model.endEdit(drag.id); dragging = false; } }
+    void mouseUp(const juce::MouseEvent&) override { if (dragging) { model.endEdit(drag.id); dragging = false; if (!bubblesOn) bubble = {}; repaint(); } }
 
     void mouseDoubleClick(const juce::MouseEvent& e) override
     {

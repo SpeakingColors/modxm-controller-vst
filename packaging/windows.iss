@@ -1,4 +1,4 @@
-; Windows installer + uninstaller (Inno Setup). Called as: ISCC /DName=ModxMController "/DProduct=MODX M Controller" /DVersion=0.1.0 packaging/windows.iss
+; Windows installer + uninstaller (Inno Setup). Called as: ISCC /DName=ModxMController "/DProduct=MODX M Controller" /DVersion=0.2.1 packaging/windows.iss
 ; Files are staged in ..\stage by the release workflow. Works offline.
 ; The uninstaller removes everything it installed. Your saved presets (%APPDATA%\Studio 87\ModxMController) are kept
 ; unless you answer Yes when it asks. A silent uninstall (/SILENT, /VERYSILENT) always keeps them.

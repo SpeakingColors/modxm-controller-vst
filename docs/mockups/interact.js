@@ -246,16 +246,16 @@
   function fy(x) { return FMIN * Math.pow(FMAX / FMIN, x); }
   function fmtF(f) { return f >= 1000 ? (f / 1000).toFixed(f >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k' : String(Math.round(f)); }
   function fmtG(g) { return (g > 0 ? '+' : g < 0 ? '-' : '') + Math.abs(g).toFixed(1); }
-  var COLORS = ['#2ECBD5', '#E9C46A', '#F27FC0', '#3FC07A'];
+  var COLORS = ['#2ECBD5', '#E9C46A', '#F27FC0', '#3FC07A', '#9B8CFF'];
   function initEq() {
     document.querySelectorAll('svg[aria-label*="curve"]').forEach(function (svg) {
       var al = svg.getAttribute('aria-label') || ''; if (!/band EQ curve|over live output curve/.test(al) || /spectrum/i.test(al)) return;
       if (svg.dataset.eq) return; svg.dataset.eq = '1';
       var H = +svg.getAttribute('viewBox').split(' ')[3], sec = svg.closest('section') || svg.parentElement.parentElement;
       var head = sec.querySelector('div[style*="height: 18px"]') || sec.querySelector('div'); var title = T(head).toLowerCase();
-      var n = /3-band/.test(title) ? 3 : /2-band/.test(title) ? 2 : 4;
-      var kinds = n === 3 ? ['ls', 'pk', 'hs'] : n === 2 ? ['ls', 'hs'] : ['ls', 'pk', 'pk', 'hs'];
-      var defaults = n === 3 ? [[100, 3], [1000, 0], [8000, 1.5]] : n === 2 ? [[300, 2], [6000, -1]] : [[60, 3], [200, 0], [1500, 0], [8000, -1]];
+      var n = /3-band/.test(title) ? 3 : /2-band/.test(title) ? 2 : 5, RNG = n === 5 ? 12 : 24;   // Master EQ on the MODX M: 5 bands, +-12 dB
+      var kinds = n === 3 ? ['ls', 'pk', 'hs'] : n === 2 ? ['ls', 'hs'] : ['ls', 'pk', 'pk', 'pk', 'hs'];
+      var defaults = n === 3 ? [[100, 3], [1000, 0], [8000, 1.5]] : n === 2 ? [[300, 2], [6000, -1]] : [[81, 0], [204, 0], [512, 0], [3200, 0], [8200, 0]];
       // read the starting values from the tiles that sit under the graph when present
       var tiles = {}; sec.parentElement.querySelectorAll('span').forEach(function (s) { var t = T(s); if (/^EQ (Low|Mid|Hi) (Gain|Freq)$/.test(t) && s.nextElementSibling) tiles[t] = s.nextElementSibling.nextElementSibling || s.nextElementSibling; });
       var wrap = document.createElement('div'); wrap.style.cssText = 'position:relative;height:' + H + 'px;background:#0F1113;user-select:none;touch-action:none';
@@ -263,7 +263,7 @@
       s2.style.cssText = 'position:absolute;left:30px;width:calc(100% - 30px);top:0;height:' + H + 'px'; wrap.appendChild(s2);
       var top = 10, bot = H >= 110 ? 100 : 90, mid = (top + bot) / 2, ph = bot - top;
       [0, 1, 2, 3, 4].forEach(function (i) { var y = top + ph * i / 4; var l = document.createElementNS(NS, 'line'); l.setAttribute('x1', 0); l.setAttribute('x2', 300); l.setAttribute('y1', y); l.setAttribute('y2', y); l.setAttribute('stroke', i === 2 ? '#30353C' : '#262A30'); l.setAttribute('vector-effect', 'non-scaling-stroke'); s2.appendChild(l);
-        var t = document.createElement('span'); t.textContent = ['+24', '+12', '0', '-12', '-24'][i]; t.style.cssText = 'position:absolute;left:3px;top:' + (y - 6) + 'px;font-size:9px;line-height:12px;color:#6E747D'; wrap.appendChild(t); });
+        var t = document.createElement('span'); t.textContent = (RNG === 12 ? ['+12', '+6', '0', '-6', '-12'] : ['+24', '+12', '0', '-12', '-24'])[i]; t.style.cssText = 'position:absolute;left:3px;top:' + (y - 6) + 'px;font-size:9px;line-height:12px;color:#6E747D'; wrap.appendChild(t); });
       [[20, 'left'], [100], [1000], [10000], [20000, 'right']].forEach(function (f) { var t = document.createElement('span'); t.textContent = fmtF(f[0]); var x = fx(f[0]); t.style.cssText = 'position:absolute;bottom:2px;font-size:9px;line-height:12px;color:#6E747D;left:calc(30px + (100% - 30px) * ' + x.toFixed(4) + ');transform:translateX(' + (f[1] === 'left' ? '0' : f[1] === 'right' ? '-100%' : '-50%') + ')'; wrap.appendChild(t); });
       var curve = document.createElementNS(NS, 'path'); curve.setAttribute('fill', 'none'); curve.setAttribute('stroke', getComputedStyle(head).backgroundColor && /rgb/.test(head.style.background) ? '#2ECBD5' : '#2ECBD5'); curve.setAttribute('stroke-width', 2); curve.setAttribute('vector-effect', 'non-scaling-stroke'); s2.appendChild(curve);
       var rgb = /rgb\((\d+), (\d+), (\d+)\)/.exec(getComputedStyle(head).backgroundImage + getComputedStyle(head).backgroundColor); curve.setAttribute('stroke', rgb ? 'rgb(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ')' : '#2ECBD5');
@@ -274,7 +274,7 @@
         return b;
       });
       function resp(f) { var g = 0, x = Math.log(f); bands.forEach(function (b) { var d = x - Math.log(b.f); if (b.kind === 'pk') g += b.g * Math.exp(-d * d / (2 * 0.55 * 0.55)); else if (b.kind === 'ls') g += b.g / (1 + Math.exp(d * 2.2)); else g += b.g / (1 + Math.exp(-d * 2.2)); }); return g; }
-      function gy(g) { return mid - g / 24 * (ph / 2); }
+      function gy(g) { return mid - g / RNG * (ph / 2); }
       function px(f) { return 'calc(30px + (100% - 30px) * ' + fx(f).toFixed(4) + ')'; }
       var dots = [];
       function draw() {
@@ -283,8 +283,8 @@
         readouts();
       }
       function readouts() { // Home: "Sub +3  Low 0  Mid 0  High -1" row under the graph
-        if (n !== 4) return;
-        var row = sec.querySelector('div[style*="margin-top: 4px"]'); if (!row) return; var nm = ['Sub', 'Low', 'Mid', 'High'];
+        if (n !== 5) return;
+        var row = sec.querySelector('div[style*="margin-top: 4px"]'); if (!row) return; var nm = ['Low', 'Lo-Mid', 'Mid', 'Hi-Mid', 'High'];
         [].slice.call(row.children).forEach(function (c) { var t = T(c); nm.forEach(function (name, i) { if (t.indexOf(name) === 0) { var v = fmtG(bands[i].g).replace(/\.0$/, ''); if (c.children[0]) c.children[0].textContent = v; else c.textContent = name + ' ' + v; } }); });
       }
       bands.forEach(function (b, i) {
@@ -292,7 +292,7 @@
         dt.addEventListener('pointerdown', function (e) {
           e.preventDefault(); e.stopPropagation(); dt.setPointerCapture(e.pointerId); dt.style.cursor = 'grabbing';
           var r = wrap.getBoundingClientRect(), x0 = r.left + 30, w = r.width - 30;
-          function mv(m) { var u = Math.max(0, Math.min(1, (m.clientX - x0) / w)); b.f = Math.max(20, Math.min(20000, fy(u))); b.g = Math.max(-24, Math.min(24, Math.round((mid - (m.clientY - r.top)) / (ph / 2) * 24 * 2) / 2)); draw(); }
+          function mv(m) { var u = Math.max(0, Math.min(1, (m.clientX - x0) / w)); b.f = Math.max(20, Math.min(20000, fy(u))); b.g = Math.max(-RNG, Math.min(RNG, Math.round((mid - (m.clientY - r.top)) / (ph / 2) * RNG * 2) / 2)); draw(); }
           function up() { dt.removeEventListener('pointermove', mv); dt.removeEventListener('pointerup', up); dt.style.cursor = 'grab'; }
           dt.addEventListener('pointermove', mv); dt.addEventListener('pointerup', up);
         });

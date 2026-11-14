@@ -4,11 +4,14 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   core-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: sh tests/run.sh
   plugin:
     needs: core-tests
@@ -18,7 +21,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - if: runner.os == 'Linux'
         run: |
           sudo apt-get update
@@ -32,7 +35,7 @@ jobs:
       - if: failure()
         shell: bash
         run: grep -E "error|Error" build.log | head -15 | while IFS= read -r l; do echo "::error::${l:0:400}"; done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: plugin-${{ runner.os }}
           path: |

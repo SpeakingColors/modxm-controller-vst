@@ -5,11 +5,18 @@
   if (window.__modxIx) return; window.__modxIx = 1;
 
   var FILES = { Home: 'MODX2_Home.dc.html', Nav: 'MODX2_Nav.dc.html', AWM2: 'MODX2_AWM2.dc.html', FMX: 'MODX2_FMX.dc.html', ANX: 'MODX2_ANX.dc.html', FX: 'MODX2_FX.dc.html', Motion: 'MODX2_Motion.dc.html', Morph: 'MODX2_Morph.dc.html', Library: 'MODX2_Library.dc.html', Output: 'MODX2_Output.dc.html' };
-  var PAGE = ((location.pathname.match(/MODX2_(\w+)\.dc\.html/) || [])[1]) || '';
+  var PAGE = window.MODX_PAGE || ((location.pathname.match(/MODX2_(\w+)\.dc\.html/) || [])[1]) || '';   // MODX_PAGE, MODX_NAV and MODX_HASH are set by the single-file export
   var ENGINES = { AWM2: 1, FMX: 1, ANX: 1 };
   function T(el) { return (el.innerText || el.textContent || '').trim().replace(/\s+/g, ' '); }
-  function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { } return null; }
-  function go(page, hash) { location.href = FILES[page] + (hash ? '#' + encodeURIComponent(hash) : ''); }
+  function store(k, v) {
+    if (window.MODX_NAV) {   // single-file export: the parent page keeps the values (a frame built from a string has no storage of its own)
+      var S = window.MODX_STORE = window.MODX_STORE || {};
+      if (v === undefined) return S[k] === undefined ? null : S[k];
+      S[k] = v; try { parent.postMessage({ modx: 'store', k: k, v: v }, '*'); } catch (e) { } return null;
+    }
+    try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { } return null; }
+  function curHash() { return window.MODX_NAV ? (window.MODX_HASH || '') : (location.hash || ''); }
+  function go(page, hash) { if (window.MODX_NAV) { window.MODX_NAV(page, hash || ''); return; } location.href = FILES[page] + (hash ? '#' + encodeURIComponent(hash) : ''); }
 
   // ---------- effect lists from the MODX M Data List (Effect Type List, columns REV / VAR / Ins / Master) ----------
   var FX = {
@@ -55,7 +62,7 @@
     var old = el.style.outline; el.style.outline = '2px solid #2ECBD5'; el.style.outlineOffset = '2px'; setTimeout(function () { el.style.outline = old; el.style.outlineOffset = ''; }, 1400);
   }
   function focusHash() {
-    var h = decodeURIComponent((location.hash || '').slice(1)); if (!h) return;
+    var h = decodeURIComponent(curHash().replace(/^#/, '')); if (!h) return;
     var names = h.split('|'), el = findByText(names); if (!el) return;
     var tab = el.closest('button') || el; if (tab.tagName === 'BUTTON' || tab.getAttribute('role') === 'tab') tab.click();
     var box = el.closest('section') || el; box.scrollIntoView({ block: 'center', behavior: 'smooth' }); flash(box);
@@ -80,9 +87,9 @@
     var a = el.closest('a');
     if (a) {
       var href = a.getAttribute('href') || '', m = /MODX2_(\w+)\.dc\.html/.exec(href);
-      if (m && ENGINES[m[1]]) store('modx.engine', m[1]);
-      var sideLabel = T(a);
-      if (a.closest('nav,[aria-label="MODX sections"]') || a.style.width === '58px') {
+      var sideLabel = T(a), inSide = a.closest('nav,[aria-label="MODX sections"]') || a.style.width === '58px';
+      if (m && ENGINES[m[1]] && !(inSide && sideLabel === 'Part')) store('modx.engine', m[1]);   // a part row remembers its engine; the sidebar Part button only reads it
+      if (inSide) {
         if (sideLabel === 'Scene') return { page: 'Nav', hash: 'Scene|Scenes' };
         if (sideLabel === 'Part') return { page: enginePage() };
       }
@@ -102,7 +109,7 @@
     var r = routeFor(el); if (!r) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if (r.action === 'sync') { modal('Sync with MODX M', ['Read Performance name and common settings', 'Read 16 part settings', 'Read effects and Master EQ', 'Read Super Knob and Assign knobs'], 'All values read. The window now shows what the synth holds.'); return; }
-    if (r.page === PAGE) { location.hash = r.hash ? encodeURIComponent(r.hash) : ''; focusHash(); return; }
+    if (r.page === PAGE) { if (window.MODX_NAV) window.MODX_HASH = r.hash ? encodeURIComponent(r.hash) : ''; else location.hash = r.hash ? encodeURIComponent(r.hash) : ''; focusHash(); return; }
     go(r.page, r.hash);
   }, true);
 
@@ -436,7 +443,8 @@
   function init() {
     initStrips(); initTempo(); initPicks(); initChips(); initPills(); initToggleBtns(); initPan(); initVolume(); initEq(); focusHash();
   }
-  function start() { setTimeout(init, 1800); }  // after support.js has finished its own set-up
+  window.__modxFocus = focusHash;
+  function start() { setTimeout(init, window.MODX_NAV ? 120 : 1800); }  // after support.js has finished its own set-up
   window.addEventListener('hashchange', focusHash);
   if (document.readyState !== 'loading') start(); else document.addEventListener('DOMContentLoaded', start);
 })();

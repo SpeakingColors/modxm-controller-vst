@@ -2,6 +2,22 @@
 
 Sources: MODX M Data List (En_B0, 261 pages), "MIDI Data Format" and "MIDI Data Table" sections (checked again 2026-11-01 against the PDF); Montage Data List (En_D0) for the comparison at the bottom. The PDF layout is two columns, so check any value you plan to hard-code against the real MODX M. Values are copied as printed.
 
+## Source tags and verification status (read this first)
+Every value in this file is tagged **official** (printed in the MODX M Data List En_B0, sections "MIDI Data Format" and "MIDI Data Table", pages 225 to 256 for the parameter tables) or **UNVERIFIED**. Nothing here is checked on a real MODX M ("untested on hardware"). I could not re-open the PDF in the latest review pass, so the table values below were not re-compared; they stay as copied earlier from the Data List.
+
+Community reports say the Data List for some firmware versions contains errors in its SysEx address tables. Use the Data List that matches the exact firmware on the unit, and treat any address or range as UNVERIFIED until it has been tried on the device.
+
+| Item | Source tag |
+|---|---|
+| CC list, channel mode, RPN | official: Data List En_B0, MIDI Data Format. Untested on hardware |
+| Bank select / program numbers | official: Data List En_B0, MIDI Data Table. Untested on hardware |
+| SysEx header, parameter change, requests, identity | official: Data List En_B0, MIDI Data Format. Untested on hardware |
+| Bulk dump byte count position | official: Data List section 3-5-4. UNVERIFIED on hardware |
+| Checksum span (whether the byte count is included) | UNVERIFIED: the list prints model ID + address + data only; the code uses that and is only used to check received dumps |
+| Parameter change address tables, `map/sysex_params.csv` | official: Data List En_B0 pp. 225 to 256, auto-extracted. UNVERIFIED on hardware |
+| Control numbers of assignable controllers | UNVERIFIED: printed table is loosely aligned in the PDF |
+| Panel edits | Community report: the instrument does not send parameter changes out when you edit on the panel (UNVERIFIED). Do not rely on reading the panel state back over MIDI; use a bulk dump or parameter request instead (also untested) |
+
 ## Channel messages the MODX M handles
 Receive and transmit unless noted. All control changes are recorded and played back by the sequencer part.
 

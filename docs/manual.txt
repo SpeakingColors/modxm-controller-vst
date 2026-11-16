@@ -16,4 +16,3 @@ MODX M Controller sends and receives the MIDI messages (CC and NRPN) of the Yama
 
 # Window
 - Resize by dragging any edge or corner; the shape stays the same. Hover a control for its address (CC or NRPN number).
-- Free and open source. The plugin collects no data and never touches the network.

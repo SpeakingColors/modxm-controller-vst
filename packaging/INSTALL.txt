@@ -1,4 +1,4 @@
-MODX M Controller install, remove and use (works fully offline)
+MODX M Controller install, remove and use
 =====================================================
 
 Windows

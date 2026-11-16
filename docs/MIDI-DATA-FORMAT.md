@@ -137,3 +137,14 @@ Both lists use the same message layout. The differences that matter for a contro
 - Identity reply device family: MODX M6/M7/M8 `6E/6F/70 06`; Montage 6/7/8 `4E/4F/50 06`.
 - Group ID is `7F 1C` on both.
 Plan: abstract the address size and model ID so one backend can drive both.
+
+## Verification status (per table)
+| Table | Source | Status |
+|---|---|---|
+| CC list above and `map/params.csv` (15 CCs) | MODX M Data List En_B0, MIDI Data Format; ranges are assumed 0 to 127 where the list prints none | documented, ranges untested; not tested on hardware |
+| Bank select and program numbers | MODX M Data List En_B0 | documented, untested; the plugin does not send them |
+| SysEx message formats (`SysexCore.h`) | MODX M Data List En_B0, section 3-5-4 | documented, untested on hardware; checksum rule not confirmed against a real dump |
+| `map/sysex_params.csv` (308 rows) | MODX M Data List En_B0, pages 225 to 256 | documented, untested on hardware (hw column is 0 for every row) |
+| Montage comparison | Montage Data List En_D0 | documented, not used by the plugin |
+
+The PDF could not be re-fetched in the last review session (the Yamaha download host was not reachable), so these tables were not re-checked then. Re-check any value against the PDF before relying on it.

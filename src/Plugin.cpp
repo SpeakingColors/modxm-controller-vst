@@ -390,7 +390,7 @@ public:
         addAndMakeVisible(page);
         page.onReset100 = page.onWoodDoubleClick = [this] { setSize(modx::HomePage::kTotalW, modx::HomePage::kTotalH); };
         page.onInfo = [] { juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "MODX M Controller",
-            "Free and open source by Studio 87. Values come from the Yamaha MODX M Data List. Nothing is sent that is not in the map, and nothing is invented. No data is collected, ever. Support: ko-fi.com/studio87"); };
+            "Free and open source by Studio 87. Values come from the Yamaha MODX M Data List. Nothing is sent that is not in the map, and nothing is invented. Support: ko-fi.com/studio87"); };
         page.onGear = [this] { showMenu(); };
         setResizable(true, false);   // edges and corners come from the border below
         getConstrainer()->setFixedAspectRatio(double(modx::HomePage::kTotalW) / double(modx::HomePage::kTotalH));

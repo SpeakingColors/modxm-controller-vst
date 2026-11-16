@@ -30,7 +30,7 @@ Build: `sh tests/run.sh` runs the pure C++ tests (no JUCE needed). The plugin ne
 ☕ Free and open source, made by one person. If it helps your music, a coffee on [Ko-fi](https://ko-fi.com/studio87) keeps it coming. 💜
 
 ## Docs
-- [Interactive mockup, one standalone file](docs/mockup/index.html) (all ten pages, works offline; rebuild with `python3 tools/build_standalone_mockup.py docs/mockup/index.html`)
+- [Interactive mockup, one standalone file](docs/mockup/index.html) (all ten pages; rebuild with `python3 tools/build_standalone_mockup.py docs/mockup/index.html`)
 - [Interactive mockups (separate pages)](docs/README.md)
 - [Roadmap](ROADMAP.md)
 - [MIDI data format and address map](docs/MIDI-DATA-FORMAT.md)

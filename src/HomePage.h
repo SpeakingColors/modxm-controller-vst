@@ -1,6 +1,6 @@
 // The Home page of the MODX M Controller window, ported natively from docs/mockups/MODX2_Home.dc.html (mockup is the plugin).
 // All boxes, texts, icons, knobs and bars come from the generated HomeLayout.h (tools/gen_home_layout.py), so the window
-// matches the mockup. Drawn in the mockup's own pixel space and scaled to the window. No web view, no data leaves the plugin.
+// matches the mockup. Drawn in the mockup's own pixel space and scaled to the window.
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <functional>
